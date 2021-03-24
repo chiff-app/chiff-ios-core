@@ -7,12 +7,12 @@
 
 import Foundation
 
-protocol AccessControllable {
+public protocol AccessControllable {
     var name: String { get }
     var id: String { get }
 }
 
-protocol PairContainerDelegate: AnyObject {
+public protocol PairContainerDelegate: AnyObject {
     func startLoading()
     func finishLoading()
 }

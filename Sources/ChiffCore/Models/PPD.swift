@@ -8,7 +8,7 @@
 import Foundation
 import PromiseKit
 
-enum PPDBaseCharacterSet: String, Codable {
+public enum PPDBaseCharacterSet: String, Codable {
     case upperLetters = "UpperLetters"
     case lowerLetters = "LowerLetters"
     case letters = "Letters"
@@ -28,12 +28,12 @@ enum PPDBaseCharacterSet: String, Codable {
     }
 }
 
-enum PPDVersion: String, Codable {
+public enum PPDVersion: String, Codable {
     case v1_0 = "1.0"
     case v1_1 = "1.1"
 }
 
-struct PPD: Codable {
+public struct PPD: Codable {
     let characterSets: [PPDCharacterSet]?
     /// Required. Represents the properties of the password.
     let properties: PPDProperties?
@@ -93,7 +93,7 @@ struct PPD: Codable {
         case name
     }
 
-    init(characterSets: [PPDCharacterSet]?, properties: PPDProperties?, service: PPDService?, version: PPDVersion?, timestamp: Timestamp?, url: String, redirect: String?, name: String) {
+    public init(characterSets: [PPDCharacterSet]?, properties: PPDProperties?, service: PPDService?, version: PPDVersion?, timestamp: Timestamp?, url: String, redirect: String?, name: String) {
         self.characterSets = characterSets
         self.properties = properties
         self.service = service
@@ -104,7 +104,7 @@ struct PPD: Codable {
         self.name = name
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.characterSets = try values.decodeIfPresent([PPDCharacterSet].self, forKey: .characterSets)
         self.properties = try values.decodeIfPresent(PPDProperties.self, forKey: .properties)
@@ -125,7 +125,7 @@ struct PPD: Codable {
     }
 }
 
-struct PPDCharacterSet: Codable {
+public struct PPDCharacterSet: Codable {
     /// The character set base characters
     let base: PPDBaseCharacterSet?
     /// String containing all characters that will be added to the character set.
@@ -145,7 +145,7 @@ struct PPDCharacterSet: Codable {
         case name
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         do {
             self.base = try values.decodeIfPresent(PPDBaseCharacterSet.self, forKey: .base)
@@ -157,7 +157,7 @@ struct PPDCharacterSet: Codable {
     }
 }
 
-struct PPDProperties: Codable {
+public struct PPDProperties: Codable {
     /// Parent node for character settings. If the node is omitted,
     /// all characters defined in the characterSets element are treated
     /// as available for use with no restrictions on minimum and maximum occurrences.
@@ -173,7 +173,7 @@ struct PPDProperties: Codable {
     var expires: Int = 0
 }
 
-struct PPDCharacterSettings: Codable {
+public struct PPDCharacterSettings: Codable {
     /// Settings element for a globally available character set.
     let characterSetSettings: [PPDCharacterSetSettings]
     /// Character sets specified in the requirement groups are implicitly added
@@ -190,7 +190,7 @@ struct PPDCharacterSettings: Codable {
     }
 }
 
-struct PPDCharacterSetSettings: Codable {
+public struct PPDCharacterSetSettings: Codable {
     /// Minimum password global occurrences of the character set. Omitted for no restrictions on minimum occurences. This includes the complete password even for positions with restrictions.
     let minOccurs: Int?
     /// Maximum password global occurrences of the character set. Omitted for no restrictions on maximum occurences. This includes the complete password even for positions with restrictions.
@@ -198,7 +198,7 @@ struct PPDCharacterSetSettings: Codable {
     let name: String
 }
 
-struct PPDPositionRestriction: Codable {
+public struct PPDPositionRestriction: Codable {
     /**
      * Comma separated list of character positions the restriction is applied to.
      * Each position can be a character position starting with 0.
@@ -219,7 +219,7 @@ struct PPDPositionRestriction: Codable {
     }
 }
 
-struct PPDRequirementGroup: Codable {
+public struct PPDRequirementGroup: Codable {
     /// Minimum number of rules that must be fulfilled.
     let minRules: Int
     /// A list of requirement rules.
@@ -231,7 +231,7 @@ struct PPDRequirementGroup: Codable {
     }
 }
 
-struct PPDRequirementRule: Codable {
+public struct PPDRequirementRule: Codable {
     /// List of character positions this rule applies to as defined in the PositionRestriction type.
     let positions: String?
     /// Minimum occurrences of the given character set. A value of 0 means no minimum occurrences.
@@ -249,24 +249,24 @@ struct PPDRequirementRule: Codable {
     }
 }
 
-struct PPDService: Codable {
+public struct PPDService: Codable {
     /// PPD login service, not implemented here.
     let login: PPDLogin
     /// PPD password change service, not implemented here.
     let passwordChange: PPDPasswordChange?
 }
 
-struct PPDLogin: Codable {
+public struct PPDLogin: Codable {
     let url: String?
 }
 
-struct PPDPasswordChange: Codable {
+public struct PPDPasswordChange: Codable {
     let url: String?
 }
 
 extension PPD: Equatable {
 
-    static func == (lhs: PPD, rhs: PPD) -> Bool {
+    public static func == (lhs: PPD, rhs: PPD) -> Bool {
         let encoder = JSONEncoder()
         guard let lhHash = try? encoder.encode(lhs).hash,
               let rhHash = try? encoder.encode(rhs).hash else {

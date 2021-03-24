@@ -14,44 +14,44 @@ import UserNotifications
 import LocalAuthentication
 import PromiseKit
 
-enum TeamSessionError: Error {
+public enum TeamSessionError: Error {
     case adminDelete
     case logoPathNotFound
     case notAdmin
     case alreadyCreated
 }
 
-enum OrganisationType: Int, Codable {
+public enum OrganisationType: Int, Codable {
     case team
     case enterprise
 }
 
 /// A session with a Chiff Team.
-struct TeamSession: Session {
-    let creationDate: Date
-    let id: String
-    var signingPubKey: String
-    let teamId: String
+public struct TeamSession: Session {
+    public let creationDate: Date
+    public let id: String
+    public var signingPubKey: String
+    public let teamId: String
     var created: Bool
-    var isAdmin: Bool
-    var version: Int
-    var title: String
-    var lastChange: Timestamp
-    let organisationKey: Data
+    public var isAdmin: Bool
+    public var version: Int
+    public var title: String
+    public var lastChange: Timestamp
+    public let organisationKey: Data
     var type: OrganisationType = .team
     var logoPath: String? {
         let filemgr = FileManager.default
         return filemgr.urls(for: .libraryDirectory, in: .userDomainMask).first?.appendingPathComponent("team_logo_\(id).png").path
     }
     #if canImport(UIKit)
-    var logo: UIImage? {
+    public var logo: UIImage? {
         guard let path = logoPath else {
             return nil
         }
         return UIImage(contentsOfFile: path)
     }
     #else
-    var logo: NSImage? {
+    public var logo: NSImage? {
         guard let path = logoPath else {
             return nil
         }
@@ -59,14 +59,14 @@ struct TeamSession: Session {
     }
     #endif
 
-    var accountCount: Int {
+    public var accountCount: Int {
         return Properties.getSharedAccountCount(teamId: id)
     }
 
     static let cryptoContext = "keynteam"
-    static var signingService: KeychainService = .teamSession(attribute: .signing)
-    static var encryptionService: KeychainService = .teamSession(attribute: .shared)
-    static var sessionCountFlag: String = "teamSessionCount"
+    public static var signingService: KeychainService = .teamSession(attribute: .signing)
+    public static var encryptionService: KeychainService = .teamSession(attribute: .shared)
+    public static var sessionCountFlag: String = "teamSessionCount"
 
     /// Initialize a `TeamSession`.
     /// - Parameters:
@@ -81,7 +81,7 @@ struct TeamSession: Session {
     ///         However, it may still be be cancelled there in the UI.
     ///   - lastChange: A timestamp of the last change, used for syncing.
     ///   - organisationKey: The organisation key that this teams belongs to. Used to retrieve organisation PPDs and logo.
-    init(id: String, teamId: String, signingPubKey: Data, title: String, version: Int, isAdmin: Bool, created: Bool = false, lastChange: Timestamp, organisationKey: Data) {
+    public init(id: String, teamId: String, signingPubKey: Data, title: String, version: Int, isAdmin: Bool, created: Bool = false, lastChange: Timestamp, organisationKey: Data) {
         self.creationDate = Date()
         self.id = id
         self.teamId = teamId
@@ -153,7 +153,7 @@ struct TeamSession: Session {
     /// Save this session to the Keychain and update remotely, if necessary.
     /// - Parameter makeBackup: Whether a remote backup should be made.
     /// - Throws: Encoding or Keychain errors.
-    mutating func update(makeBackup: Bool) throws {
+    public mutating func update(makeBackup: Bool) throws {
         if makeBackup {
             lastChange = Date.now
         }
@@ -165,7 +165,7 @@ struct TeamSession: Session {
     }
 
     // Documentation in protocol.
-    func delete(notify: Bool) -> Promise<Void> {
+    public func delete(notify: Bool) -> Promise<Void> {
         return firstly {
             API.shared.signedRequest(path: "teams/users/\(teamId)/\(id)", method: .delete, privKey: try signingPrivKey())
         }.map { _ in
@@ -184,7 +184,7 @@ struct TeamSession: Session {
     /// - Parameter backup: If this is true (default), backup will be deleted as well.
     /// - Throws: Keychain errors.
     func delete(backup: Bool = true) throws {
-        SharedAccount.deleteAll(for: self.id)
+        fatalError("TODO: Delete shared accounts outside this function")
         try Keychain.shared.delete(id: SessionIdentifier.sharedKey.identifier(for: id), service: Self.encryptionService)
         try Keychain.shared.delete(id: SessionIdentifier.sharedSeed.identifier(for: id), service: Self.signingService)
         try Keychain.shared.delete(id: SessionIdentifier.signingKeyPair.identifier(for: id), service: Self.signingService)
@@ -199,7 +199,7 @@ struct TeamSession: Session {
     /// Save the team session keys to the Keychain.
     /// - Parameter keys: The `TeamSessionKeys`.
     /// - Throws: Keychain or encoding errors.
-    func save(keys: TeamSessionKeys) throws {
+    public func save(keys: TeamSessionKeys) throws {
         try keys.save(id: self.id, data: PropertyListEncoder().encode(self))
     }
 
@@ -226,7 +226,7 @@ struct TeamSession: Session {
 
     /// Retrieve the team seed remotely aand decrypt it.
     /// - Returns: A promise of the team seed.
-    func getTeamSeed() -> Promise<Data> {
+    public func getTeamSeed() -> Promise<Data> {
         return firstly {
             API.shared.signedRequest(path: "teams/users/\(teamId)/\(id)/admin", method: .get, privKey: try signingPrivKey())
         }.map { result in
@@ -237,46 +237,6 @@ struct TeamSession: Session {
             let seed = try Crypto.shared.decrypt(ciphertext, key: self.sharedKey(), version: self.version)
             return seed
         }.log("Error getting admin seed")
-    }
-
-    /// Get an instance of the `Team` that corresponds to this session.
-    /// - Returns: A Promise of the `Team`.
-    func getTeam() -> Promise<Team> {
-        return firstly {
-            getTeamSeed()
-        }.then { seed in
-            Team.get(id: self.teamId, seed: seed)
-        }
-    }
-
-    func submitAccountToTeam(account: UserAccount) -> Promise<Void> {
-        do {
-            let passwordGenerator = PasswordGenerator(username: account.username, siteId: account.sites[0].id, ppd: account.sites[0].ppd, passwordSeed: try passwordSeed())
-            var offset: [Int]?
-            if let password = try account.password() {
-                offset = try passwordGenerator.calculateOffset(index: 0, password: password)
-            }
-            let token = try account.oneTimePasswordToken()
-            let newAccount = BackupSharedAccount(
-                id: account.id,
-                username: account.username,
-                sites: account.sites,
-                passwordIndex: 0,
-                passwordOffset: offset,
-                tokenURL: try token?.toURL(),
-                tokenSecret: token?.generator.secret,
-                version: account.version,
-                notes: try account.notes())
-            let data = try JSONEncoder().encode(newAccount)
-            let message: [String: Any] = [
-                "data": try Crypto.shared.encrypt(data, key: self.sharedKey()).base64
-            ]
-            return API.shared.signedRequest(path: "teams/users/\(teamId)/\(id)/accounts/\(account.id)", method: .post, privKey: try signingPrivKey(), message: message).asVoid()
-        } catch {
-            print(error)
-            return Promise(error: error)
-        }
-
     }
 
 }
@@ -297,7 +257,7 @@ extension TeamSession: Codable {
         case type
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.teamId = try values.decode(String.self, forKey: .teamId)

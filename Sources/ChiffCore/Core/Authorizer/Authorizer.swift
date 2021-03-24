@@ -10,7 +10,7 @@ import OneTimePassword
 import LocalAuthentication
 import PromiseKit
 
-enum AuthorizationError: Error {
+public enum AuthorizationError: Error {
     case cannotChangeAccount
     case noTeamSessionFound
     case notAdmin
@@ -20,7 +20,7 @@ enum AuthorizationError: Error {
     case multipleAdminSessionsFound(count: Int)
 }
 
-protocol Authorizer {
+public protocol Authorizer {
     var session: BrowserSession { get set }
     var browserTab: Int { get }
     var type: ChiffMessageType { get }
@@ -35,7 +35,7 @@ protocol Authorizer {
     func authorize(startLoading: ((_ status: String?) -> Void)?) -> Promise<Account?>
 }
 
-extension Authorizer {
+public extension Authorizer {
 
     /// Notifies the session client that this request is rejected.
     func rejectRequest() -> Guarantee<Void> {

@@ -9,7 +9,7 @@ import Foundation
 import LocalAuthentication
 
 /// Groups keychain objects and determines classification.
-enum KeychainService {
+public enum KeychainService {
     case account(attribute: AccountAttribute? = nil)
     case sharedAccount(attribute: AccountAttribute? = nil)
     case seed
@@ -18,13 +18,13 @@ enum KeychainService {
     case aws
     case backup
 
-    enum AccountAttribute: String {
+    public enum AccountAttribute: String {
         case otp
         case webauthn
         case notes
     }
 
-    enum SessionAttribute: String {
+    public enum SessionAttribute: String {
         case shared
         case signing
     }

@@ -11,7 +11,7 @@ import LocalAuthentication
 import AuthenticationServices
 import PromiseKit
 
-enum AccountError: Error {
+public enum AccountError: Error {
     case invalidURL
     case duplicateAccountId
     case accountsNotLoaded
@@ -25,7 +25,7 @@ enum AccountError: Error {
     case importError(failed: Int, total: Int)
 }
 
-protocol Account: BaseAccount {
+public protocol Account: BaseAccount {
     var askToLogin: Bool? { get set }
     var askToChange: Bool? { get set }
     var timesUsed: Int { get set }
@@ -47,7 +47,7 @@ protocol Account: BaseAccount {
     func update(secret: Data?, backup: Bool) throws
 }
 
-extension Account {
+public extension Account {
 
     /// Whether this account has an TOTP or HOTP code stored.
     var hasOtp: Bool {

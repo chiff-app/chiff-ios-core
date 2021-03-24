@@ -16,7 +16,7 @@ enum WebAuthnError: Error {
     case wrongAlgorithm
 }
 
-enum WebAuthnAlgorithm: Int, Codable, Equatable {
+public enum WebAuthnAlgorithm: Int, Codable, Equatable {
     case edDSA = -8
     case ECDSA256 = -7
     case ECDSA384 = -35
@@ -31,7 +31,7 @@ enum WebAuthnAlgorithm: Int, Codable, Equatable {
     }
 }
 
-struct WebAuthnExtensions: Codable {
+public struct WebAuthnExtensions: Codable {
     let hmacSecret: Bool?
     let credentialProtectionPolicy: Int?
 
@@ -42,7 +42,7 @@ struct WebAuthnExtensions: Codable {
 }
 
 /// A WebAuthn for an account.
-struct WebAuthn: Equatable {
+public struct WebAuthn: Equatable {
     /// This is the RPid (relying party id) in WebAuthn definition.
     let id: String
     let algorithm: WebAuthnAlgorithm
@@ -375,7 +375,7 @@ extension WebAuthn: Codable {
         case counter
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.algorithm = try values.decode(WebAuthnAlgorithm.self, forKey: .algorithm)

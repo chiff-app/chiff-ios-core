@@ -8,16 +8,16 @@
 import LocalAuthentication
 import PromiseKit
 
-class LoginAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type: ChiffMessageType
-    let browserTab: Int
+public class LoginAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type: ChiffMessageType
+    public let browserTab: Int
     let siteName: String
     let accountId: String
     let siteURL: String?
     let siteId: String?
 
-    var successText: String {
+    public var successText: String {
         switch type {
         case .fill, .getDetails:
             return "requests.get_password_successful".localized.capitalizedFirstLetter
@@ -25,7 +25,7 @@ class LoginAuthorizer: Authorizer {
             return "requests.login_succesful".localized.capitalizedFirstLetter
         }
     }
-    var requestText: String {
+    public var requestText: String {
         switch type {
         case .fill, .getDetails:
             return "requests.get_password".localized.capitalizedFirstLetter
@@ -33,7 +33,7 @@ class LoginAuthorizer: Authorizer {
             return "requests.confirm_login".localized.capitalizedFirstLetter
         }
     }
-    var authenticationReason: String {
+    public var authenticationReason: String {
         switch type {
         case .fill, .getDetails:
             return String(format: "requests.get_for".localized, siteName)
@@ -42,7 +42,7 @@ class LoginAuthorizer: Authorizer {
         }
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         self.type = request.type
         guard let browserTab = request.browserTab,
@@ -65,7 +65,7 @@ class LoginAuthorizer: Authorizer {
         }
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)

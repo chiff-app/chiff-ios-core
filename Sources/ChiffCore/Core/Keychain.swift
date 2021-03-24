@@ -13,7 +13,7 @@ import PromiseKit
 /// Wrapper around the Keychain.
 public struct Keychain: KeychainProtocol {
 
-    static var shared: KeychainProtocol = Keychain()
+    public static var shared: KeychainProtocol = Keychain()
 
     private init() {}
 
@@ -31,7 +31,7 @@ public struct Keychain: KeychainProtocol {
     ///   - `KeychainError.interactionNotAllowed` when trying to save an object while the user is not authenticated.
     ///   - `KeychainError.duplicateItem` when an item with this id already exists.
     ///   - `KeychainError.unhandledError(status.message)` for any other Keychain error.
-    func save(id identifier: String, service: KeychainService, secretData: Data?, objectData: Data? = nil, label: String? = nil) throws {
+    public func save(id identifier: String, service: KeychainService, secretData: Data?, objectData: Data? = nil, label: String? = nil) throws {
         guard secretData != nil || objectData != nil else {
             throw KeychainError.noData
         }
@@ -85,7 +85,7 @@ public struct Keychain: KeychainProtocol {
     ///   - `KeychainError.unexpectedData` when the cannot be decoded.
     ///   - `KeychainError.unhandledError(status.message)` for any other Keychain error.
     /// - Returns: The data, or nil if item was not found.
-    func get(id identifier: String, service: KeychainService, context: LAContext? = nil) throws -> Data? {
+    public func get(id identifier: String, service: KeychainService, context: LAContext? = nil) throws -> Data? {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: identifier,
                                     kSecAttrService as String: service.service,
@@ -122,7 +122,7 @@ public struct Keychain: KeychainProtocol {
     ///   - identifier: The objects identifier, which should be unique.
     ///   - service: The service, which determines access group and accessibility.
     ///   - context: Optionally, an authenticated `LAContext`. Uses the main `LAContext` otherwise.
-    func has(id identifier: String, service: KeychainService, context: LAContext? = nil) -> Bool {
+    public func has(id identifier: String, service: KeychainService, context: LAContext? = nil) -> Bool {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: identifier,
                                     kSecAttrService as String: service.service,
@@ -148,7 +148,7 @@ public struct Keychain: KeychainProtocol {
     ///   - `KeychainError.interactionNotAllowed` when trying to save an object while the user is not authenticated.
     ///   - `KeychainError.notFound` when item is not found.
     ///   - `KeychainError.unhandledError(status.message)` for any other Keychain error.
-    func update(id identifier: String, service: KeychainService, secretData: Data? = nil, objectData: Data? = nil, context: LAContext? = nil) throws {
+    public func update(id identifier: String, service: KeychainService, secretData: Data? = nil, objectData: Data? = nil, context: LAContext? = nil) throws {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: identifier,
                                     kSecAttrService as String: service.service,
@@ -194,7 +194,7 @@ public struct Keychain: KeychainProtocol {
     ///   - `KeychainError.unexpectedData` when the cannot be decoded.
     ///   - `KeychainError.unhandledError(status.message)` for any other Keychain error.
     /// - Returns: The data, or nil if item was not found.
-    func all(service: KeychainService, context: LAContext? = nil, label: String? = nil) throws -> [[String: Any]]? {
+    public func all(service: KeychainService, context: LAContext? = nil, label: String? = nil) throws -> [[String: Any]]? {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrService as String: service.service,
                                     kSecMatchLimit as String: kSecMatchLimitAll,
@@ -236,7 +236,7 @@ public struct Keychain: KeychainProtocol {
     ///   - `KeychainError.unexpectedData` when the cannot be decoded.
     ///   - `KeychainError.unhandledError(status.message)` for any other Keychain error.
     /// - Returns: The data, or nil if item was not found.
-    func attributes(id identifier: String, service: KeychainService, context: LAContext? = nil) throws -> Data? {
+    public func attributes(id identifier: String, service: KeychainService, context: LAContext? = nil) throws -> Data? {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: identifier,
                                     kSecAttrService as String: service.service,
@@ -274,7 +274,7 @@ public struct Keychain: KeychainProtocol {
     ///   - identifier: The object's unique identifier
     ///   - service: The service, which determines access group and accessibility.
     /// - Throws: `KeychainError.notFound` when item is not found.
-    func delete(id identifier: String, service: KeychainService) throws {
+    public func delete(id identifier: String, service: KeychainService) throws {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: identifier,
                                     kSecAttrService as String: service.service]
@@ -292,7 +292,7 @@ public struct Keychain: KeychainProtocol {
     ///   - service: The service, which determines access group and accessibility.
     ///   - label: Optionally, a label on which the results should be filtered.
     /// - Throws: `KeychainError.notFound` when item is not found.
-    func deleteAll(service: KeychainService, label: String? = nil) {
+    public func deleteAll(service: KeychainService, label: String? = nil) {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrService as String: service.service]
         if let label = label {
@@ -317,7 +317,7 @@ public struct Keychain: KeychainProtocol {
     ///   - `KeychainError.unexpectedData` when the cannot be decoded.
     ///   - `KeychainError.unhandledError(status.message)` for any other Keychain error.
     /// - Returns: The data, or nil if item was not found.
-    func get(id identifier: String, service: KeychainService, reason: String, with context: LAContext? = nil, authenticationType type: AuthenticationType) -> Promise<Data?> {
+    public func get(id identifier: String, service: KeychainService, reason: String, with context: LAContext? = nil, authenticationType type: AuthenticationType) -> Promise<Data?> {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: identifier,
                                     kSecAttrService as String: service.service,

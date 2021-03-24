@@ -9,16 +9,16 @@ import Foundation
 import LocalAuthentication
 import PromiseKit
 
-class QueueHandler {
+public class QueueHandler {
 
-    static let shared = QueueHandler()
+    public static let shared = QueueHandler()
 
     private let pollingAttempts = 5
 
     private var listening = false
 
     /// Start listening locally for notifications to listen.
-    func start() {
+    public func start() {
         guard !listening else {
             return
         }

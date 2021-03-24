@@ -9,17 +9,17 @@ import Foundation
 import TrustKit
 import PromiseKit
 
-class API: NSObject, APIProtocol {
+public class API: NSObject, APIProtocol {
 
     private var urlSession: URLSession!
-    static var shared: APIProtocol = API()
+    public static var shared: APIProtocol = API()
 
     override init() {
         super.init()
         urlSession = URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: self, delegateQueue: nil)
     }
 
-    func signedRequest(path: String, method: APIMethod, privKey: Data, message: JSONObject? = nil, body: Data? = nil, parameters: [String: String]? = nil) -> Promise<JSONObject> {
+    public func signedRequest(path: String, method: APIMethod, privKey: Data, message: JSONObject? = nil, body: Data? = nil, parameters: [String: String]? = nil) -> Promise<JSONObject> {
         var message = message ?? [:]
         message["httpMethod"] = method.rawValue
         message["timestamp"] = Date.now
@@ -34,7 +34,7 @@ class API: NSObject, APIProtocol {
         }
     }
 
-    func signedRequest<T>(path: String, method: APIMethod, privKey: Data, message: JSONObject? = nil, body: Data? = nil, parameters: [String: String]? = nil) -> Promise<T> {
+    public func signedRequest<T>(path: String, method: APIMethod, privKey: Data, message: JSONObject? = nil, body: Data? = nil, parameters: [String: String]? = nil) -> Promise<T> {
         var message = message ?? [:]
         message["httpMethod"] = method.rawValue
         message["timestamp"] = Date.now
@@ -49,7 +49,7 @@ class API: NSObject, APIProtocol {
         }
     }
 
-    func request(
+    public func request(
         path: String,
         method: APIMethod,
         signature: String? = nil,
@@ -61,7 +61,7 @@ class API: NSObject, APIProtocol {
         }
     }
 
-    func request<T>(
+    public func request<T>(
         path: String,
         method: APIMethod,
         signature: String? = nil,
@@ -129,7 +129,7 @@ class API: NSObject, APIProtocol {
 
 extension API: URLSessionDelegate {
 
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let validator = TrustKit.sharedInstance().pinningValidator
         if !(validator.handle(challenge, completionHandler: completionHandler)) {
             completionHandler(URLSession.AuthChallengeDisposition.performDefaultHandling, nil)

@@ -9,7 +9,7 @@ import Foundation
 import PromiseKit
 import PMKFoundation
 
-enum APIError: Error {
+public enum APIError: Error {
     case url
     case jsonSerialization
     case request(error: Error)
@@ -22,7 +22,7 @@ enum APIError: Error {
     case urlSize
 }
 
-enum APIMethod: String {
+public enum APIMethod: String {
     case get = "GET"
     case put = "PUT"
     case post = "POST"
@@ -42,10 +42,10 @@ extension URLSession {
     }
 }
 
-typealias JSONObject = [String: Any]
+public typealias JSONObject = [String: Any]
 
 /// Send requests to the Chiff back-end.
-protocol APIProtocol {
+public protocol APIProtocol {
     /// Sends a request to the back-end, signing the message with the provided private key.
     /// The `timestamp` and `method` will be added to the message before signing, as they are required for all requests.
     /// - Parameters:
@@ -91,7 +91,7 @@ protocol APIProtocol {
     func request<T>(path: String, method: APIMethod, signature: String?, body: Data?, parameters: [String: String]?) -> Promise<T>
 }
 
-extension APIProtocol {
+public extension APIProtocol {
     func signedRequest(path: String, method: APIMethod, privKey: Data, message: JSONObject? = nil, body: Data? = nil, parameters: [String: String]? = nil) -> Promise<JSONObject> {
         return signedRequest(path: path, method: method, privKey: privKey, message: message, body: body, parameters: parameters)
     }

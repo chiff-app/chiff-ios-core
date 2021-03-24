@@ -10,7 +10,7 @@ import LocalAuthentication
 import CryptoKit
 import PromiseKit
 
-enum KeychainError: Error {
+public enum KeychainError: Error {
     case stringEncoding
     case unexpectedData
     case storeKey
@@ -24,7 +24,7 @@ enum KeychainError: Error {
     case duplicateItem
 }
 
-protocol KeychainProtocol {
+public protocol KeychainProtocol {
     /// Save an object in the keychain. `secretData` and/or `objectData` must be present.
     /// - Parameters:
     ///   - identifier: The objects identifier, which should be unique.
@@ -163,9 +163,14 @@ protocol KeychainProtocol {
     ///   - `KeychainError.notFound` if the item is not found.
     ///   - `KeychainError.unhandledError` for any other error.
     func deleteAllKeys()
+
+    /// Checks if the Keychain needs upgrading to the latest version. Does nothing if already up to date
+    /// - Parameter context: An authenticated `LAContext` object.
+    func migrate(context: LAContext?)
 }
 
-extension KeychainProtocol {
+// Extension for default parameters
+public extension KeychainProtocol {
 
     func save(id identifier: String, service: KeychainService, secretData: Data?, objectData: Data? = nil, label: String? = nil) throws {
         return try save(id: identifier, service: service, secretData: secretData, objectData: objectData, label: label)

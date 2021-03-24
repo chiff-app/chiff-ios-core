@@ -8,13 +8,13 @@
 import Foundation
 import PromiseKit
 
-extension BrowserSession {
+public extension BrowserSession {
 
     /// Update a single `SessionAccount` in this session.
     /// - Parameter account: The updated account.
     /// - Throws: Encoding or encryption errors.
-    func updateSessionAccount(account: Account) throws -> Promise<Void> {
-        let accountData = try JSONEncoder().encode(SessionAccount(account: account))
+    func updateSessionAccount(account: SessionAccount) throws -> Promise<Void> {
+        let accountData = try JSONEncoder().encode(account)
         let ciphertext = try Crypto.shared.encrypt(accountData, key: sharedKey())
         let message = [
             "id": account.id,
@@ -30,10 +30,10 @@ extension BrowserSession {
 
     /// Update multiple session accounts for this session.
     /// - Parameter accounts: A dictionary of accounts, where the key is the id.
-    func updateSessionAccounts(accounts: [String: UserAccount]) -> Promise<Void> {
+    func updateSessionAccounts(accounts: [String: SessionAccount]) -> Promise<Void> {
         do {
             let encryptedAccounts: [String: String] = try accounts.mapValues {
-                let data = try JSONEncoder().encode(SessionAccount(account: $0))
+                let data = try JSONEncoder().encode($0)
                 return try Crypto.shared.encrypt(data, key: sharedKey()).base64
             }
             let message: [String: Any] = [

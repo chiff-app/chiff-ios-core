@@ -12,28 +12,28 @@ import AuthenticationServices
 import CryptoKit
 import PromiseKit
 
-struct UserAccount: Account, Equatable {
+public struct UserAccount: Account, Equatable {
 
-    let id: String
-    var username: String
-    var sites: [Site]
-    var passwordIndex: Int
-    var lastPasswordUpdateTryIndex: Int
-    var passwordOffset: [Int]?
-    var askToLogin: Bool?
-    var askToChange: Bool?
-    var version: Int
-    var webAuthn: WebAuthn?
-    var timesUsed: Int
-    var lastTimeUsed: Date?
-    var lastChange: Timestamp
-    var shadowing: Bool = false // This is set when loading accounts if there exists a team account with the same ID.
+    public let id: String
+    public var username: String
+    public var sites: [Site]
+    public var passwordIndex: Int
+    public var lastPasswordUpdateTryIndex: Int
+    public var passwordOffset: [Int]?
+    public var askToLogin: Bool?
+    public var askToChange: Bool?
+    public var version: Int
+    public var webAuthn: WebAuthn?
+    public var timesUsed: Int
+    public var lastTimeUsed: Date?
+    public var lastChange: Timestamp
+    public var shadowing: Bool = false // This is set when loading accounts if there exists a team account with the same ID.
 
-    static let currentVersion = 1
-    static let keychainService: KeychainService = .account()
-    static let otpService: KeychainService = .account(attribute: .otp)
-    static let notesService: KeychainService = .account(attribute: .notes)
-    static let webAuthnService: KeychainService = .account(attribute: .webauthn)
+    public static let currentVersion = 1
+    public static let keychainService: KeychainService = .account()
+    public static let otpService: KeychainService = .account(attribute: .otp)
+    public static let notesService: KeychainService = .account(attribute: .notes)
+    public static let webAuthnService: KeychainService = .account(attribute: .webauthn)
 
     /// Create a `UserAccount`. This generates passwords or offset and saves the account to the Keychain as well.
     /// - Parameters:
@@ -47,7 +47,7 @@ struct UserAccount: Account, Equatable {
     ///   - context: Optionally, an authenticated `LAContext` object.
     ///   - offline: If this is true, no remote calls should be made (creating the backup and the session accounts).
     /// - Throws: Keychain or password generation errors.
-    init(username: String,
+    public init(username: String,
          sites: [Site],
          password: String?,
          rpId: String?,
@@ -161,7 +161,7 @@ struct UserAccount: Account, Equatable {
     /// Set an OTP token for this account.
     /// - Parameter token: The `Token`.
     /// - Throws: Keychain or decoding errors.
-    mutating func setOtp(token: Token) throws {
+    public mutating func setOtp(token: Token) throws {
         let secret = token.generator.secret
         let tokenData = try token.toURL().absoluteString.data
         self.lastChange = Date.now
@@ -176,7 +176,7 @@ struct UserAccount: Account, Equatable {
     /// Update the notes for this account.
     /// - Parameter notes: The notes
     /// - Throws: Keychain or decoding errors.
-    mutating func updateNotes(notes: String) throws {
+    public mutating func updateNotes(notes: String) throws {
         self.lastChange = Date.now
         if Keychain.shared.has(id: id, service: Self.notesService) {
             if notes.isEmpty {
@@ -192,11 +192,11 @@ struct UserAccount: Account, Equatable {
 
     /// Delete the OTP token from this account.
     /// - Throws: Keychain or decoding errors.
-    mutating func deleteOtp() throws {
+    public mutating func deleteOtp() throws {
         self.lastChange = Date.now
         try Keychain.shared.delete(id: id, service: Self.otpService)
         _ = try backup()
-        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: self) })
+        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: SessionAccount(account: self)) })
         saveToIdentityStore()
     }
 
@@ -212,7 +212,7 @@ struct UserAccount: Account, Equatable {
     /// Remove a website from the array of sites.
     /// - Parameter index: The index of the website to remove.
     /// - Throws: Keychain errors.
-    mutating func removeSite(forIndex index: Int) throws {
+    public mutating func removeSite(forIndex index: Int) throws {
         self.sites.remove(at: index)
         self.lastChange = Date.now
         try update(secret: nil)
@@ -240,20 +240,20 @@ struct UserAccount: Account, Equatable {
     ///   - url: The new URL.
     ///   - index: The index of the site that should be updated.
     /// - Throws: Keychain errors.
-    mutating func updateSite(url: String, forIndex index: Int) throws {
+    public mutating func updateSite(url: String, forIndex index: Int) throws {
         self.sites[index].url = url
         self.lastChange = Date.now
         try update(secret: nil)
     }
 
     // Documentation in protocol
-    func update(secret: Data?, backup: Bool = true) throws {
+    public func update(secret: Data?, backup: Bool = true) throws {
         let accountData = try PropertyListEncoder().encode(self as Self)
         try Keychain.shared.update(id: id, service: Self.keychainService, secretData: secret, objectData: accountData, context: nil)
         if backup {
             _ = try self.backup()
         }
-        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: self as Self) })
+        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: SessionAccount(account: self as Self)) })
         saveToIdentityStore()
     }
 
@@ -267,7 +267,7 @@ struct UserAccount: Account, Equatable {
     ///   - askToChange: Whether the client should ask to change.
     ///   - context: Optionally, an authenticated `LAContext` object.
     /// - Throws: Keychain and password generation errors.
-    mutating func update(username newUsername: String?, password newPassword: String?, siteName: String?, url: String?, askToLogin: Bool?, askToChange: Bool?, context: LAContext? = nil) throws {
+    public mutating func update(username newUsername: String?, password newPassword: String?, siteName: String?, url: String?, askToLogin: Bool?, askToChange: Bool?, context: LAContext? = nil) throws {
         if let newUsername = newUsername {
             self.username = newUsername
         }
@@ -300,7 +300,7 @@ struct UserAccount: Account, Equatable {
         try update(secret: newPassword?.data)
     }
 
-    func delete() -> Promise<Void> {
+    public func delete() -> Promise<Void> {
         do {
             try self.webAuthn?.delete(accountId: self.id)
             return firstly {
@@ -366,7 +366,7 @@ struct UserAccount: Account, Equatable {
         }
         if !offline {
             _ = try backup()
-            try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: self) })
+            try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: SessionAccount(account: self)) })
         }
         saveToIdentityStore()
         Properties.accountCount += 1
@@ -392,7 +392,7 @@ extension UserAccount: Codable {
         case lastChange
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.username = try values.decode(String.self, forKey: .username)

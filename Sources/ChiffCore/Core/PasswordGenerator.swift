@@ -8,7 +8,7 @@
 import Foundation
 import LocalAuthentication
 
-enum PasswordGenerationError: Error {
+public enum PasswordGenerationError: Error {
     case characterNotAllowed
     case tooShort
     case tooLong
@@ -18,7 +18,7 @@ enum PasswordGenerationError: Error {
 }
 
 /// Deterministically passwords with or without a PPD.
-class PasswordGenerator {
+public class PasswordGenerator {
 
     static let cryptoContext = "keynpass"
 
@@ -39,7 +39,7 @@ class PasswordGenerator {
         - passwordSeed: The seed from which the key for the password should be derived.
         - version: For backwards compatibility, the version can be provided to re-generate password that used an older version of the algorithm. Defaults to the current version
      */
-    init(username: String, siteId: String, ppd: PPD?, passwordSeed: Data, version: Int = 1) {
+    public init(username: String, siteId: String, ppd: PPD?, passwordSeed: Data, version: Int = 1) {
         self.username = username
         self.siteId = siteId
         self.ppd = ppd
@@ -77,7 +77,7 @@ class PasswordGenerator {
      - Returns: A tuple of the password and the index.
      - Postcondition: The returned index is higher or equal to the provided index.
      */
-    func generate(index passwordIndex: Int, offset: [Int]?) throws -> (String, Int) {
+    public func generate(index passwordIndex: Int, offset: [Int]?) throws -> (String, Int) {
         let length = self.length(isCustomPassword: offset != nil)
         guard length >= PasswordValidator.minPasswordLength else {
             throw PasswordGenerationError.tooShort
@@ -107,7 +107,7 @@ class PasswordGenerator {
 
      - Returns: The password offset as list of numbers, where each number is a byte: `0 <= n <= 255`.
      */
-    func calculateOffset(index passwordIndex: Int, password: String) throws -> [Int] {
+    public func calculateOffset(index passwordIndex: Int, password: String) throws -> [Int] {
         let chars = PasswordValidator.allCharacterSet.sorted()
         let length = self.length(isCustomPassword: true)
         let validator = PasswordValidator(ppd: ppd)

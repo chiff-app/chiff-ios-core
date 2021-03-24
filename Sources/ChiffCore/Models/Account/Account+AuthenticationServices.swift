@@ -50,7 +50,7 @@ extension Account {
 
     /// Reload all accounts into the identity store.
     @available(iOS 12.0, *)
-    static func reloadIdentityStore() {
+    public static func reloadIdentityStore() {
         ASCredentialIdentityStore.shared.removeAllCredentialIdentities({ (result, error) in
             if let error = error {
                 Logger.shared.error("Error deleting credentials from identity store", error: error)

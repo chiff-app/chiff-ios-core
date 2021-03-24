@@ -80,19 +80,19 @@ struct TeamSessionSeeds: TeamSessionSeedsProtocol {
 }
 
 /// This is a container for the admin session keys. Used when bootstraping a new team.
-struct TeamSessionKeys: TeamSessionSeedsProtocol {
-    let seed: Data
-    let passwordSeed: Data
-    let encryptionKey: Data
-    let signingKeyPair: KeyPair
-    let browserPubKey: Data
-    let sharedKeyKeyPair: KeyPair
+public struct TeamSessionKeys: TeamSessionSeedsProtocol {
+    public let seed: Data
+    public let passwordSeed: Data
+    public let encryptionKey: Data
+    public let signingKeyPair: KeyPair
+    public let browserPubKey: Data
+    public let sharedKeyKeyPair: KeyPair
 
-    var sessionId: String {
+    public var sessionId: String {
         return browserPubKey.base64.hash!
     }
 
-    var pubKey: String {
+    public var pubKey: String {
         return sharedKeyKeyPair.pubKey.base64
     }
 
@@ -100,23 +100,8 @@ struct TeamSessionKeys: TeamSessionSeedsProtocol {
     /// - Parameter seed: The seed
     /// - Throws: Crypto errors.
     /// - Returns: The base64-encoded encrypted seed.
-    func encrypt(seed: Data) throws -> String {
+    public func encrypt(seed: Data) throws -> String {
         return (try Crypto.shared.encrypt(seed, key: encryptionKey)).base64
-    }
-
-    /// Create an admin `TeamUser` with the public key of the backup seed set
-    /// as this user's `userSyncPubkey`.
-    /// - Throws: Keychain errors
-    /// - Returns: The `TeamUser`.
-    func createAdmin() throws -> TeamUser {
-        return TeamUser(pubkey: signingKeyPair.pubKey.base64,
-                            userPubkey: sharedKeyKeyPair.pubKey.base64,
-                            id: sessionId,
-                            key: seed.base64,
-                            created: Date.now,
-                            userSyncPubkey: try Seed.publicKey(),
-                            isAdmin: true,
-                            name: "devices.admin".localized)
     }
 
     /// Save to datta to the Keychain, optionally providing attribute data.
@@ -130,7 +115,7 @@ struct TeamSessionKeys: TeamSessionSeedsProtocol {
 
 }
 
-extension TeamSessionKeys {
+public extension TeamSessionKeys {
 
     /// Initialize the `TeamSessionKey` from a `browserPubKey`. Our keypair will be generated.
     /// - Parameter browserPubKey: Their public key.

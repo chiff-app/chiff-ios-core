@@ -7,20 +7,27 @@
 
 import Foundation
 
-struct Site: Codable {
+public struct Site: Codable {
     /// The name of the site.
-    var name: String
+    public var name: String
     /// The id of the site, which is the SHA256 hash of the URL.
-    var id: String
+    public var id: String
     /// The URL of the site.
-    var url: String
+    public var url: String
     /// If present, the PPD for this site. Saved here so we generate the same password.
-    var ppd: PPD?
+    public var ppd: PPD?
+
+    public init(name: String, id: String, url: String, ppd: PPD? = nil) {
+        self.name = name
+        self.id = id
+        self.url = url
+        self.ppd = ppd
+    }
 }
 
 extension Site: Equatable {
 
-    static func == (lhs: Site, rhs: Site) -> Bool {
+    public static func == (lhs: Site, rhs: Site) -> Bool {
         return rhs.id == lhs.id && rhs.name == lhs.name && rhs.url == lhs.url && rhs.ppd == lhs.ppd
     }
 

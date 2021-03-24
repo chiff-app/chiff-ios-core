@@ -8,10 +8,10 @@
 import LocalAuthentication
 import PromiseKit
 
-class AddSiteAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type: ChiffMessageType
-    let browserTab: Int
+public class AddSiteAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type: ChiffMessageType
+    public let browserTab: Int
     let siteName: String
     let siteURL: String
     let siteId: String
@@ -20,13 +20,13 @@ class AddSiteAuthorizer: Authorizer {
     let notes: String?
     let askToChange: Bool?
 
-    let requestText = "requests.add_account".localized.capitalizedFirstLetter
-    let successText = "requests.account_added".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.add_account".localized.capitalizedFirstLetter
+    public let successText = "requests.account_added".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return  String(format: "requests.add_site".localized, siteName)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         self.type = request.type
         guard let browserTab = request.browserTab,
@@ -49,7 +49,7 @@ class AddSiteAuthorizer: Authorizer {
         Logger.shared.analytics(.addSiteRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
         return firstly {
             try PPD.get(id: siteId, organisationKeyPair: TeamSession.organisationKeyPair())

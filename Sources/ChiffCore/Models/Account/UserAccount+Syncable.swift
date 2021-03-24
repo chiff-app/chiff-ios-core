@@ -12,25 +12,25 @@ import PromiseKit
 
 extension UserAccount: Syncable {
 
-    typealias BackupType = BackupUserAccount
+    public typealias BackupType = BackupUserAccount
 
-    static var syncEndpoint: SyncEndpoint {
+    public static var syncEndpoint: SyncEndpoint {
         return .accounts
     }
 
     // Documentation in protocol.
-    static func all(context: LAContext?) throws -> [String: UserAccount] {
+    public static func all(context: LAContext?) throws -> [String: UserAccount] {
         // If label is not provided, this method tries to call itself and crashes..
         return try all(context: context, label: nil)
     }
 
     // Documentation in protocol.
-    static func create(backupObject: BackupUserAccount, context: LAContext?) throws {
+    public static func create(backupObject: BackupUserAccount, context: LAContext?) throws {
         _ = try UserAccount(backupObject: backupObject, context: context)
     }
 
     // Documentation in protocol.
-    static func notifyObservers() {
+    public static func notifyObservers() {
         NotificationCenter.default.postMain(name: .accountsLoaded, object: nil)
     }
 
@@ -106,7 +106,7 @@ extension UserAccount: Syncable {
     }
 
     // Documentation in protocol
-    func backup() throws -> Promise<Void> {
+    public func backup() throws -> Promise<Void> {
         var tokenURL: URL?
         var tokenSecret: Data?
         if let token = try oneTimePasswordToken() {
@@ -119,7 +119,7 @@ extension UserAccount: Syncable {
     }
 
     // Documentation in protocol.
-    mutating func update(with backupObject: BackupUserAccount, context: LAContext? = nil) throws -> Bool {
+    public mutating func update(with backupObject: BackupUserAccount, context: LAContext? = nil) throws -> Bool {
         // Attributes
         var (changed, updatePassword) = updateAttributes(with: backupObject)
 
@@ -291,20 +291,20 @@ extension UserAccount: Syncable {
 
 }
 
-struct BackupUserAccount: BaseAccount, BackupObject {
-    let id: String
-    var username: String
-    var sites: [Site]
-    var passwordIndex: Int
-    var passwordOffset: [Int]?
+public struct BackupUserAccount: BaseAccount, BackupObject {
+    public let id: String
+    public var username: String
+    public var sites: [Site]
+    public var passwordIndex: Int
+    public var passwordOffset: [Int]?
     var askToLogin: Bool?
     var askToChange: Bool?
     var enabled: Bool       // Deprecated
     var tokenURL: URL?
     var tokenSecret: Data?
-    var version: Int
+    public var version: Int
     var webAuthn: WebAuthn?
-    var lastChange: Timestamp
+    public var lastChange: Timestamp
     var notes: String?
 
     enum CodingKeys: CodingKey {
@@ -341,7 +341,7 @@ struct BackupUserAccount: BaseAccount, BackupObject {
         self.notes = notes
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.username = try values.decode(String.self, forKey: .username)

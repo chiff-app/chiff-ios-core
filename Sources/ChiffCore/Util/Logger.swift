@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol LoggerProtocol {
+public protocol LoggerProtocol {
     /// Set the user id for analytics and error logging.
     /// - Parameter userId: The user id.
     func setUserId(userId: String?)
@@ -45,7 +45,7 @@ protocol LoggerProtocol {
     func analytics(_ event: AnalyticsEvent, properties: [AnalyticsEventProperty: Any]?, override: Bool)
 }
 
-extension LoggerProtocol {
+public extension LoggerProtocol {
     func warning(_ message: String, error: Error? = nil, userInfo: [String: Any]? = nil, _ file: StaticString = #file, _ function: StaticString = #function, _ line: UInt = #line) {
         return warning(message, error: error, userInfo: userInfo, file, function, line)
     }
@@ -65,23 +65,23 @@ extension LoggerProtocol {
     }
 }
 
-struct Logger: LoggerProtocol {
+public struct Logger: LoggerProtocol {
 
     static var shared: LoggerProtocol = Logger()
 
-    func setUserId(userId: String?) {
-        print("UserID set to \(userId)")
+    public func setUserId(userId: String?) {
+        print("UserID set to \(userId ?? "no userid")")
     }
 
-    func setAnalyticsLogging(value: Bool) {
+    public func setAnalyticsLogging(value: Bool) {
         print("Analytics set to \(value)")
     }
 
-    func warning(_ message: String, error: Error? = nil, userInfo: [String: Any]? = nil, _ file: StaticString = #file, _ function: StaticString = #function, _ line: UInt = #line) {
+    public func warning(_ message: String, error: Error? = nil, userInfo: [String: Any]? = nil, _ file: StaticString = #file, _ function: StaticString = #function, _ line: UInt = #line) {
         print("--------- ⚠️ WARNING: \(String(describing: error)). \(message) ---------")
     }
 
-    func error(_ message: String,
+    public func error(_ message: String,
                error: Error? = nil,
                userInfo: [String: Any]? = nil,
                override: Bool = false,
@@ -91,7 +91,7 @@ struct Logger: LoggerProtocol {
         print("--------- ☠️ ERROR: \(String(describing: error)). \(message) --------- ")
     }
 
-    func analytics(_ event: AnalyticsEvent, properties: [AnalyticsEventProperty: Any]? = nil, override: Bool = false) {
+    public func analytics(_ event: AnalyticsEvent, properties: [AnalyticsEventProperty: Any]? = nil, override: Bool = false) {
         print("ℹ️ EVENT: \(event)")
     }
 

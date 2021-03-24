@@ -8,7 +8,7 @@
 import Foundation
 import PromiseKit
 
-extension BrowserSession {
+public extension BrowserSession {
 
     /// Initite a new browser session after scanning a QR-code.
     /// - Parameters:
@@ -32,7 +32,7 @@ extension BrowserSession {
             let teamSession = try TeamSession.all().first // Get first for now, perhaps handle unlikely scenario where user belongs to multiple organisation in the future.
             let response = try BrowserPairingResponse(id: session.id, pubKey: keyPairForSharedKey.pubKey.base64, browserPubKey: browserPubKey,
                                                       version: session.version, organisationKey: teamSession?.organisationKey.base64,
-                                                      organisationType: teamSession?.type, isAdmin: teamSession?.isAdmin)
+                                                      organisationType: teamSession?.type, isAdmin: teamSession?.isAdmin, accounts: UserAccount.combinedSessionAccounts())
             return firstly {
                 try session.createQueues(signingKeyPair: signingKeyPair,
                                          sharedKey: sharedKey,

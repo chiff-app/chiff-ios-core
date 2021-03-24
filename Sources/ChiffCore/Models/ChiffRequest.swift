@@ -8,30 +8,30 @@
 import Foundation
 
 /// Request received from clients. Direction browser -> app.
-struct ChiffRequest: Codable {
-    let accountID: String?
-    let accountIDs: [Int: String]?
-    let browserTab: Int?
-    let challenge: String?
-    let password: String?
-    let passwordSuccessfullyChanged: Bool?
-    let siteID: String?
-    let siteName: String?
-    let newSiteName: String?
-    let siteURL: String?
-    let notes: String?
-    let type: ChiffMessageType
-    let relyingPartyId: String?
-    let algorithms: [WebAuthnAlgorithm]?
-    let username: String?
-    let sentTimestamp: TimeInterval
-    let count: Int?
-    let orderKey: String?
-    let organisationName: String?
-    let askToChange: Bool?
-    let webAuthnExtensions: WebAuthnExtensions?
-    var sessionID: String?
-    var accounts: [BulkAccount]?
+public struct ChiffRequest: Codable {
+    public let accountID: String?
+    public let accountIDs: [Int: String]?
+    public let browserTab: Int?
+    public let challenge: String?
+    public let password: String?
+    public let passwordSuccessfullyChanged: Bool?
+    public let siteID: String?
+    public let siteName: String?
+    public let newSiteName: String?
+    public let siteURL: String?
+    public let notes: String?
+    public let type: ChiffMessageType
+    public let relyingPartyId: String?
+    public let algorithms: [WebAuthnAlgorithm]?
+    public let username: String?
+    public let sentTimestamp: TimeInterval
+    public let count: Int?
+    public let orderKey: String?
+    public let organisationName: String?
+    public let askToChange: Bool?
+    public let webAuthnExtensions: WebAuthnExtensions?
+    public var sessionID: String?
+    public var accounts: [BulkAccount]?
 
     enum CodingKeys: String, CodingKey {
         case accountID = "a"

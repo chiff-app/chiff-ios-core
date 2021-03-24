@@ -8,22 +8,22 @@
 import LocalAuthentication
 import PromiseKit
 
-class AddToExistingAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.addToExisting
-    let browserTab: Int
+public class AddToExistingAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.addToExisting
+    public let browserTab: Int
     let siteName: String
     let siteURL: String
     let siteId: String
     let accountId: String
 
-    let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
-    let successText = "requests.login_succesful".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
+    public let successText = "requests.login_succesful".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return  String(format: "requests.login_to".localized, siteName)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab,
               let siteName = request.siteName,
@@ -40,7 +40,7 @@ class AddToExistingAuthorizer: Authorizer {
         Logger.shared.analytics(.addSiteToExistingRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
         return firstly {
             try PPD.get(id: self.siteId, organisationKeyPair: TeamSession.organisationKeyPair())

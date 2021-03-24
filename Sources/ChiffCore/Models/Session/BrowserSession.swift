@@ -14,7 +14,7 @@ import UserNotifications
 import LocalAuthentication
 import PromiseKit
 
-enum Browser: String, Codable {
+public enum Browser: String, Codable {
     case firefox
     case chrome
     case edge
@@ -25,27 +25,27 @@ enum Browser: String, Codable {
 }
 
 /// The session with a browser. Can actually also be with CLI.
-struct BrowserSession: Session {
+public struct BrowserSession: Session {
     let browser: Browser
-    let creationDate: Date
-    let id: String
-    let signingPubKey: String
-    let version: Int
-    var title: String
+    public let creationDate: Date
+    public let id: String
+    public let signingPubKey: String
+    public let version: Int
+    public var title: String
     #if canImport(UIKit)
-    var logo: UIImage? {
+    public var logo: UIImage? {
         return UIImage(named: browser.rawValue)
     }
     #else
-    var logo: NSImage? {
+    public var logo: NSImage? {
         return NSImage(named: browser.rawValue)
     }
     #endif
-    var lastRequest: Date?
+    public var lastRequest: Date?
 
-    static var signingService: KeychainService = .browserSession(attribute: .signing)
-    static var encryptionService: KeychainService = .browserSession(attribute: .shared)
-    static var sessionCountFlag = "sessionCount"
+    public static var signingService: KeychainService = .browserSession(attribute: .signing)
+    public static var encryptionService: KeychainService = .browserSession(attribute: .shared)
+    public static var sessionCountFlag = "sessionCount"
 
     /// Initiate a BrowserSession.
     /// - Parameters:
@@ -64,13 +64,13 @@ struct BrowserSession: Session {
     }
 
     // Documentation in protocol
-    func update(makeBackup: Bool = false) throws {
+    public func update(makeBackup: Bool = false) throws {
         let sessionData = try PropertyListEncoder().encode(self as Self)
         try Keychain.shared.update(id: SessionIdentifier.sharedKey.identifier(for: id), service: Self.encryptionService, objectData: sessionData)
     }
 
     // Documentation in protocol
-    func delete(notify: Bool) -> Promise<Void> {
+    public func delete(notify: Bool) -> Promise<Void> {
 
         func deleteSession() {
             do {
@@ -94,7 +94,7 @@ struct BrowserSession: Session {
     /// - Parameter message64: The base64-encoded cihertext.
     /// - Throws: Decryption, decoding or Keychain errors.
     /// - Returns: The `ChiffRequest`.
-    func decrypt(message message64: String) throws -> ChiffRequest {
+    public func decrypt(message message64: String) throws -> ChiffRequest {
         var message: ChiffRequest = try decryptMessage(message: message64)
         message.sessionID = id
         return message
@@ -187,7 +187,7 @@ struct BrowserSession: Session {
     ///   - browserTab: The browserTab
     ///   - context: Optionally, an authenticated `LAContext` object.
     ///   - organisationKey: The organisation key, used to retrieve organisation PPDs.
-    mutating func sendTeamSeed(id: String, teamId: String, seed: String, browserTab: Int, context: LAContext, organisationKey: String?) -> Promise<Void> {
+    public mutating func sendTeamSeed(id: String, teamId: String, seed: String, browserTab: Int, context: LAContext, organisationKey: String?) -> Promise<Void> {
         do {
             let message = try JSONEncoder().encode(KeynCredentialsResponse(type: .createOrganisation,
                                                                            browserTab: browserTab,
@@ -345,7 +345,7 @@ extension BrowserSession: Codable {
         case os
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.title = try values.decodeIfPresent(String.self, forKey: .title) ?? ""

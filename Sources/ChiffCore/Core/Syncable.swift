@@ -9,30 +9,30 @@ import Foundation
 import LocalAuthentication
 import PromiseKit
 
-enum SyncError: Error {
+public enum SyncError: Error {
     case dataDeleted
     case webAuthnExists
 }
 
-enum SyncEndpoint: String {
+public enum SyncEndpoint: String {
     case sessions
     case accounts
 }
 
-struct RecoveryResult {
-    let succeeded: Int
-    let failed: Int
-    var total: Int {
+public struct RecoveryResult {
+    public let succeeded: Int
+    public let failed: Int
+    public var total: Int {
         return succeeded + failed
     }
 }
 
-protocol BackupObject: Codable {
+public protocol BackupObject: Codable {
     var lastChange: Timestamp { get }
 }
 
 /// Conforming to `Syncable` means the object may be updated if the remote data changes.
-protocol Syncable {
+public protocol Syncable {
     associatedtype BackupType: BackupObject
 
     var id: String { get }
@@ -90,7 +90,7 @@ extension Syncable {
     /// Provides the backup server private key to the objects that conform to `Syncable`.
     /// - Throws: `KeychainError.notFound` if the private key is not found.
     /// - Returns: The private key.
-    static func privateKey() throws -> Data {
+    public static func privateKey() throws -> Data {
         guard let privKey = try Keychain.shared.get(id: KeyIdentifier.priv.identifier(for: .backup), service: .backup) else {
             throw KeychainError.notFound
         }
@@ -120,7 +120,7 @@ extension Syncable {
     /// In addition, if the are any local objects that are not present remotely, they are deleted.
     ///
     /// - Parameter context: Optionally, the `LAContext` for authentication.
-    static func sync(context: LAContext?) -> Promise<Void> {
+    public static func sync(context: LAContext?) -> Promise<Void> {
         return firstly { () -> Promise<[String: BackupType]> in
             getData(context: context)
         }.then { (result: [String: BackupType]) -> Promise<Void> in

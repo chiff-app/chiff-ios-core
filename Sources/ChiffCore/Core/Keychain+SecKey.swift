@@ -12,7 +12,7 @@ import CryptoKit
 import PromiseKit
 
 /// The interface needed for SecKey conversion.
-protocol SecKeyConvertible: CustomStringConvertible {
+public protocol SecKeyConvertible: CustomStringConvertible {
     /// Creates a key from an X9.63 representation.
     init<Bytes>(x963Representation: Bytes) throws where Bytes: ContiguousBytes
 
@@ -38,7 +38,7 @@ extension SecKeyConvertible {
 @available(iOS 13.0, *) extension P521.Signing.PrivateKey: SecKeyConvertible {}
 @available(iOS 13.0, *) extension P521.KeyAgreement.PrivateKey: SecKeyConvertible {}
 
-extension Keychain {
+public extension Keychain {
 
     // MARK: - SecKey operations
 

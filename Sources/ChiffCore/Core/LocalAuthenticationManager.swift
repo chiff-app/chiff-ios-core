@@ -9,7 +9,7 @@ import Foundation
 import LocalAuthentication
 import PromiseKit
 
-enum AuthenticationType {
+public enum AuthenticationType {
     /// Only presents LocalAuthentication if needed. Uses the main context.
     case ifNeeded
     /// Always presents LocalAuthentication and cancels any current operations. Used without context, so a new one is created
@@ -17,12 +17,12 @@ enum AuthenticationType {
 }
 
 /// Manages and queues the LocalAuthentication requests to prevent duplicate requests.
-class LocalAuthenticationManager {
+public class LocalAuthenticationManager {
 
-    static let shared = LocalAuthenticationManager()
+    public static let shared = LocalAuthenticationManager()
 
     /// The main context. This generally should be authenticated when app is open and invalidated when the app is closed.
-    var mainContext: LAContext = LAContext()
+    public var mainContext: LAContext = LAContext()
 
     private var localAuthenticationQueue: OperationQueue = {
         var queue = OperationQueue()
@@ -33,12 +33,12 @@ class LocalAuthenticationManager {
     }()
 
     /// Checks if there is any authentication in progress.
-    var authenticationInProgress: Bool {
+    public var authenticationInProgress: Bool {
         return localAuthenticationQueue.operationCount > 0
     }
 
-    /// Checks if the main context is autheenticated.
-    var isAuthenticated: Bool {
+    /// Checks if the main context is authenticated.
+    public var isAuthenticated: Bool {
         return mainContext.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil)
     }
 
@@ -66,7 +66,7 @@ class LocalAuthenticationManager {
     ///   - reason: The reason that should be presented to the user.
     ///   - withMainContext: If this is false, a new context is created, effectively making sure the authentication popup is presented.
     /// - Returns: The authenticated `LAContext` object.
-    func authenticate(reason: String, withMainContext: Bool) -> Promise<LAContext> {
+    public func authenticate(reason: String, withMainContext: Bool) -> Promise<LAContext> {
         return Promise { seal in
             do {
                 if withMainContext {
@@ -93,7 +93,7 @@ class LocalAuthenticationManager {
     /// Some errors indicate there may something wrong in the app, while others are throws when, for example, the user cancels the operation.
     /// - Parameter error: The error that should be checked.
     /// - Returns: A localized user-friendly error string.
-    func handleError(error: Error) -> String? {
+    public func handleError(error: Error) -> String? {
         switch error {
         case KeychainError.authenticationCancelled, LAError.appCancel, LAError.systemCancel, LAError.userCancel:
             // Not interesting, do nothing.

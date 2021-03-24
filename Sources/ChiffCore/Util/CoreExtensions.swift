@@ -23,7 +23,7 @@ extension Int {
     }
 }
 
-extension String {
+public extension String {
 
     /// The blake2b hash of this string.
     var hash: String? {
@@ -115,11 +115,15 @@ extension URL {
     }
 }
 
-extension Data {
+public extension Data {
 
     struct HexEncodingOptions: OptionSet {
-        let rawValue: Int
+        public let rawValue: Int
         static let upperCase = HexEncodingOptions(rawValue: 1 << 0)
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
     }
 
     /// A hex-encoded string of this data.
@@ -167,7 +171,7 @@ extension Data {
 
 }
 
-extension Collection {
+public extension Collection {
 
     /// Returns the element at the specified index if it is within bounds, otherwise nil.
     subscript (safe index: Index) -> Element? {
@@ -185,9 +189,9 @@ extension Array where Element == UInt8 {
 }
 
 /// Typealias for Int to make clear it concerns a epoch timestamp.
-typealias Timestamp = Int
+public typealias Timestamp = Int
 
-extension Date {
+public extension Date {
 
     init(millisSince1970: Timestamp) {
         self.init(timeIntervalSince1970: TimeInterval(millisSince1970 / 1000))

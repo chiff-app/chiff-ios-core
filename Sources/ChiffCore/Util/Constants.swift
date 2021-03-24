@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AnalyticsUserProperty: String {
+public enum AnalyticsUserProperty: String {
     case accountCount = "Number of accounts"
     case pairingCount = "Number of pairings"
     case subscribed = "Subscribed"
@@ -18,7 +18,7 @@ enum AnalyticsUserProperty: String {
     case sessionSum = "Session sum" // = Amplitude sessions, as in: times the app was used
 }
 
-enum AnalyticsEvent: String {
+public enum AnalyticsEvent: String {
     // Onboarding
     case appFirstOpened = "AppFirstOpened"
     case restoreBackupOpened = "RecoverAccountOpened"
@@ -87,7 +87,7 @@ enum AnalyticsEvent: String {
     case analytics = "Analytics"
 }
 
-enum AnalyticsEventProperty: String {
+public enum AnalyticsEventProperty: String {
     case timestamp = "Timestamp"
     case value = "Value" // True or false
     case scheme = "Scheme" // Of QR-code
@@ -101,19 +101,6 @@ enum MessageParameter {
     static let body = "body"
     static let receiptHandle = "receiptHandle"
     static let type = "type"
-}
-
-enum NotificationType: String {
-    case sync = "SYNC"
-    case deleteTeamSession = "DELETE_TEAM_SESSION" // Deprecated
-    case browser = "BROWSER"
-}
-
-enum NotificationCategory {
-    static let passwordRequest = "PASSWORD_REQUEST"
-    static let endSession = "END_SESSION"
-    static let changeConfirmation = "CHANGE_CONFIRMATION"
-    static let onboardingNudge = "ONBOARDING_NUDGE"
 }
 
 enum NotificationContentKey: String {
@@ -137,7 +124,7 @@ enum NotificationContentKey: String {
  * They always have a type so the app/browser can determine course of action.
  * There is one struct for requests, there are multiple for responses.
  */
-enum ChiffMessageType: Int, Codable {
+public enum ChiffMessageType: Int, Codable {
     case pair = 0
     case login = 1
     case register = 2

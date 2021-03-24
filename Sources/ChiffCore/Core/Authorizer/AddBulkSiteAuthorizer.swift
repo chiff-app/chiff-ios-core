@@ -8,21 +8,21 @@
 import LocalAuthentication
 import PromiseKit
 
-class AddBulkSiteAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.addBulk
-    let browserTab: Int
-    let count: Int
+public class AddBulkSiteAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.addBulk
+    public let browserTab: Int
+    public let count: Int
 
-    let requestText = "requests.add_accounts".localized.capitalizedFirstLetter
-    var successText: String {
+    public let requestText = "requests.add_accounts".localized.capitalizedFirstLetter
+    public var successText: String {
         return "\(count) \("requests.accounts_added".localized)"
     }
-    var authenticationReason: String {
+    public var authenticationReason: String {
         return String(format: "requests.n_new_accounts".localized, count)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let count = request.count,
               let browserTab = request.browserTab else {
@@ -33,7 +33,7 @@ class AddBulkSiteAuthorizer: Authorizer {
         Logger.shared.analytics(.addBulkSitesRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var succeeded: [String: (UserAccount, String?)] = [:]
         var failed = 0
         return firstly {
@@ -59,7 +59,7 @@ class AddBulkSiteAuthorizer: Authorizer {
                     failed += 1
                 }
             }
-            var promises: [Promise<Void>] = try BrowserSession.all().map { $0.updateSessionAccounts(accounts: succeeded.mapValues { $0.0 }) }
+            var promises: [Promise<Void>] = try BrowserSession.all().map { $0.updateSessionAccounts(accounts: succeeded.mapValues { SessionAccount(account: $0.0) }) }
             promises.append(UserAccount.backup(accounts: succeeded))
             startLoading?("requests.import_progress_4".localized)
             return when(fulfilled: promises).asVoid().map { (accounts.count, context) }

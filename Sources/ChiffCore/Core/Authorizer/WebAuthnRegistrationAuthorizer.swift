@@ -8,10 +8,10 @@
 import LocalAuthentication
 import PromiseKit
 
-class WebAuthnRegistrationAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.webauthnCreate
-    let browserTab: Int
+public class WebAuthnRegistrationAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.webauthnCreate
+    public let browserTab: Int
     let siteName: String
     let siteURL: String
     let siteId: String
@@ -21,13 +21,13 @@ class WebAuthnRegistrationAuthorizer: Authorizer {
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
 
-    let requestText = "requests.add_account".localized.capitalizedFirstLetter
-    let successText = "requests.account_added".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.add_account".localized.capitalizedFirstLetter
+    public let successText = "requests.account_added".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return  String(format: "requests.add_site".localized, siteName)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab,
               let siteName = request.siteName,
@@ -50,7 +50,7 @@ class WebAuthnRegistrationAuthorizer: Authorizer {
         Logger.shared.analytics(.webAuthnCreateRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)

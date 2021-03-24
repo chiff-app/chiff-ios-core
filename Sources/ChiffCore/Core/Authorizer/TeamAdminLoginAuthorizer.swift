@@ -8,18 +8,18 @@
 import LocalAuthentication
 import PromiseKit
 
-class TeamAdminLoginAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.adminLogin
-    let browserTab: Int
+public class TeamAdminLoginAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.adminLogin
+    public let browserTab: Int
 
-    let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
-    let successText = "requests.login_succesful".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
+    public let successText = "requests.login_succesful".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return String(format: "requests.login_to".localized, "requests.keyn_for_teams".localized)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab else {
             throw AuthorizationError.missingData
@@ -28,7 +28,7 @@ class TeamAdminLoginAuthorizer: Authorizer {
         Logger.shared.analytics(.adminLoginRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         do {
             let teamSession = try getTeamSession()
             return firstly {

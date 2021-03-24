@@ -8,7 +8,7 @@
 import Foundation
 
 /// Contains the shared properties for accounts
-protocol BaseAccount: Codable {
+public protocol BaseAccount: Codable {
     var id: String { get }
     var username: String { get set }
     var sites: [Site] { get set }
@@ -19,7 +19,7 @@ protocol BaseAccount: Codable {
     var hasPassword: Bool { get }
 }
 
-extension BaseAccount {
+public extension BaseAccount {
 
     /// Get the first site from the sites array.
     var site: Site {

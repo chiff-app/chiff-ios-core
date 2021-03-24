@@ -10,7 +10,7 @@ import Sodium
 import CommonCrypto
 import CryptoKit
 
-enum CryptoError: Error {
+public enum CryptoError: Error {
     case randomGeneration
     case base64Decoding
     case base64Encoding
@@ -28,10 +28,10 @@ enum CryptoError: Error {
 }
 
 /// The Crypto singleton, that handles are cryptography-related operations. Uses libsodium (swift-sodium) under the hood.
-class Crypto {
+public class Crypto {
 
     /// The `Crypto` singleton instance.
-    static let shared = Crypto()
+    public static let shared = Crypto()
     private let seedSize = 16
     private let keySize = 32
     private let contextSize = 8
@@ -46,7 +46,7 @@ class Crypto {
     /// - Parameter length: The number of bytes that should be generated.
     /// - Throws: `CryptoError.randomGeneration` is libsodium fails.
     /// - Returns: The random data.
-    func generateSeed(length: Int? = nil) throws -> Data {
+    public func generateSeed(length: Int? = nil) throws -> Data {
         guard let seed = sodium.randomBytes.buf(length: length ?? seedSize) else {
             throw CryptoError.randomGeneration
         }
@@ -57,7 +57,7 @@ class Crypto {
     /// Generates a random ID, which is a hex-encoded string of randomly generated 32 bytes.
     /// - Throws: `CryptoError.randomGeneration` is libsodium fails.
     /// - Returns: The random id, which is a hex-encoded string of randomly generated 32 bytes.
-    func generateRandomId() throws -> String {
+    public func generateRandomId() throws -> String {
         guard let seed = sodium.randomBytes.buf(length: keySize), let id = sodium.utils.bin2hex(seed) else {
             throw CryptoError.randomGeneration
         }
@@ -125,7 +125,7 @@ class Crypto {
     /// - Parameter seed: Optionally, a seed can be provided to use as the private key.
     /// - Throws: `CryptoError.keyGeneration` when libsodium fails to generate the keypair.
     /// - Returns: The signing keypair.
-    func createSigningKeyPair(seed: Data?) throws -> KeyPair {
+    public func createSigningKeyPair(seed: Data?) throws -> KeyPair {
         guard let keyPair = (seed != nil) ? sodium.sign.keyPair(seed: seed!.bytes) : sodium.sign.keyPair() else {
             throw CryptoError.keyGeneration
         }
@@ -179,7 +179,7 @@ class Crypto {
     ///     - `CryptoError.keyDerivation` if key derivation operation fails.
     /// - Precondition: The context must be *exactly* 8 characters.
     /// - Returns: The derived key (256 bit).
-    func deriveKey(keyData: Data, context: String, index: UInt64 = 0) throws ->  Data {
+    public func deriveKey(keyData: Data, context: String, index: UInt64 = 0) throws ->  Data {
         guard context.count <= 8 else {
             throw CryptoError.contextOverflow
         }
@@ -196,7 +196,7 @@ class Crypto {
     /// - Parameter base64String: The input string.
     /// - Throws: `CryptoError.base64Decoding` if libsodium fails to decode the string.
     /// - Returns: The data.
-    func convertFromBase64(from base64String: String) throws -> Data {
+    public func convertFromBase64(from base64String: String) throws -> Data {
         guard let bytes = sodium.utils.base642bin(base64String, variant: .URLSAFE_NO_PADDING, ignore: nil) else {
             throw CryptoError.base64Decoding
         }
@@ -208,7 +208,7 @@ class Crypto {
     /// - Parameter data: The input data
     /// - Throws: `CryptoError.base64Encoding` if libsodium fails to encode the string. It is unclear when this would happen.
     /// - Returns: The base64-encoded string.
-    func convertToBase64(from data: Data) throws -> String {
+    public func convertToBase64(from data: Data) throws -> String {
         guard let b64String = sodium.utils.bin2base64(data.bytes, variant: .URLSAFE_NO_PADDING) else {
             throw CryptoError.base64Encoding
         }
@@ -234,7 +234,7 @@ class Crypto {
     ///   - privKey: The private key.
     /// - Throws: `CryptoError.signing` when libsodium fails to sign the message.
     /// - Returns: The signed message.
-    func sign(message: Data, privKey: Data) throws -> Data {
+    public func sign(message: Data, privKey: Data) throws -> Data {
         guard let signedMessage = sodium.sign.sign(message: message.bytes, secretKey: privKey.bytes) else {
             throw CryptoError.signing
         }
@@ -248,7 +248,7 @@ class Crypto {
     ///   - privKey: The private key.
     /// - Throws: `CryptoError.signing` when libsodium fails to sign the message.
     /// - Returns: The signature.
-    func signature(message: Data, privKey: Data) throws -> Data {
+    public func signature(message: Data, privKey: Data) throws -> Data {
         guard let signature = sodium.sign.signature(message: message.bytes, secretKey: privKey.bytes) else {
             throw CryptoError.signing
         }
@@ -265,7 +265,7 @@ class Crypto {
     ///   - secretKey: The key that should be used for encryption.
     /// - Throws: `CryptoError.encryption` when libsodium fails to encrypt.
     /// - Returns: The ciphertext with a prepended authentication tag.
-    func encryptSymmetric(_ plaintext: Data, secretKey: Data) throws -> Data {
+    public func encryptSymmetric(_ plaintext: Data, secretKey: Data) throws -> Data {
         guard let ciphertext: Bytes = sodium.secretBox.seal(message: plaintext.bytes, secretKey: secretKey.bytes) else {
             throw CryptoError.encryption
         }
@@ -280,7 +280,7 @@ class Crypto {
     ///   - secretKey: The key that should be used for decryption.
     /// - Throws: `CryptoError.encryption` when libsodium fails to encrypt or if authentication tag is incorrect.
     /// - Returns: The plaintext.
-    func decryptSymmetric(_ ciphertext: Data, secretKey: Data) throws -> Data {
+    public func decryptSymmetric(_ ciphertext: Data, secretKey: Data) throws -> Data {
         guard let plaintext: Bytes = sodium.secretBox.open(nonceAndAuthenticatedCipherText: ciphertext.bytes, secretKey: secretKey.bytes) else {
             throw CryptoError.decryption
         }
@@ -310,7 +310,7 @@ class Crypto {
     ///   - key: The shared key, as obtained with `generateSharedKey(pubKey: Data, privKey: Data)`.
     /// - Throws: `CryptoError.encryption` when libsodium fails to encrypt.
     /// - Returns: The ciphertext with a prepended authentication tag.
-    func encrypt(_ plaintext: Data, key: Data) throws -> Data {
+    public func encrypt(_ plaintext: Data, key: Data) throws -> Data {
         var data = plaintext.bytes
         sodium.utils.pad(bytes: &data, blockSize: paddingBlockSize)
         guard let ciphertext: Bytes = sodium.box.seal(message: data, beforenm: key.bytes) else {

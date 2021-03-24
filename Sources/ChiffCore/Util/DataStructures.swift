@@ -19,7 +19,7 @@ struct BulkLoginAccount: Codable {
 }
 
 /// Account object when importing from a CSV file.
-struct BulkAccount: Codable {
+public struct BulkAccount: Codable {
     let username: String
     let password: String
     let siteId: String
@@ -59,7 +59,7 @@ struct ChiffPersistentQueueMessage: Codable {
 }
 
 /// The account object that is shared with the session.
-struct SessionAccount: Codable {
+public struct SessionAccount: Codable {
     let id: String
     let askToLogin: Bool?
     let askToChange: Bool?
@@ -95,7 +95,7 @@ struct SessionSite: Codable {
 }
 
 /// The account object that is stored as a backup.
-struct BackupSharedAccount: Codable, Equatable {
+public struct BackupSharedAccount: Codable, Equatable {
     let id: String
     var username: String
     var sites: [Site]
@@ -105,6 +105,19 @@ struct BackupSharedAccount: Codable, Equatable {
     var tokenSecret: Data?
     let version: Int
     var notes: String?
+
+    public init(id: String, username: String, sites: [Site], passwordIndex: Int, passwordOffset: [Int]? = nil, tokenURL: URL? = nil, tokenSecret: Data? = nil, version: Int, notes: String? = nil) {
+        self.id = id
+        self.username = username
+        self.sites = sites
+        self.passwordIndex = passwordIndex
+        self.passwordOffset = passwordOffset
+        self.tokenURL = tokenURL
+        self.tokenSecret = tokenSecret
+        self.version = version
+        self.notes = notes
+    }
+
 }
 
 /// The response sent back to the sessin when a request is received.
@@ -149,19 +162,19 @@ enum KeyType: UInt64 {
     case passwordSeed, backupSeed, webAuthnSeed
 }
 
-enum CodingError: Error {
+public enum CodingError: Error {
     case stringEncoding
     case stringDecoding
     case unexpectedData
     case missingData
 }
 
-struct KeyPair {
-    let pubKey: Data
-    let privKey: Data
+public struct KeyPair {
+    public let pubKey: Data
+    public let privKey: Data
 }
 
-enum KeyIdentifier: String, Codable {
+public enum KeyIdentifier: String, Codable {
     // Seed
     case password
     case backup
@@ -177,30 +190,7 @@ enum KeyIdentifier: String, Codable {
     case subscription
     case endpoint
 
-    func identifier(for keychainService: KeychainService) -> String {
+    public func identifier(for keychainService: KeychainService) -> String {
         return "\(keychainService.service).\(self.rawValue)"
-    }
-}
-
-enum TypeError: Error {
-    case wrongViewControllerType
-    case wrongViewType
-}
-
-enum SortingValue: Int {
-    case alphabetically
-    case mostly
-    case recently
-
-    static var all: [SortingValue] {
-        return [.alphabetically, .mostly, .recently]
-    }
-
-    var text: String {
-        switch self {
-        case .alphabetically: return "accounts.alphabetically".localized
-        case .mostly: return "accounts.mostly".localized
-        case .recently: return "accounts.recently".localized
-        }
     }
 }

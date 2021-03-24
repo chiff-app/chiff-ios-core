@@ -17,7 +17,7 @@ extension TeamSession {
     // MARK: - Static methods
 
     /// Update all team sessions, syncing with the current state of the team.
-    static func updateAllTeamSessions() -> Promise<Void> {
+    public static func updateAllTeamSessions() -> Promise<Void> {
         do {
             let teamSessions = try TeamSession.all()
             let wasAdmin = teamSessions.contains(where: { $0.isAdmin })
@@ -43,7 +43,7 @@ extension TeamSession {
 
     /// Update this `TeamSession` to the current team state. Returns an updated copy.
     /// - Returns: A Promise of an updated copy of this `TeamSession`, or this session if nothing was updated.
-    func update() -> Promise<TeamSession> {
+    public func update() -> Promise<TeamSession> {
         return firstly {
             when(fulfilled:
                     self.getOrganisationData(),

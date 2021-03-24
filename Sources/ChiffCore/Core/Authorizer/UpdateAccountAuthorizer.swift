@@ -8,10 +8,10 @@
 import LocalAuthentication
 import PromiseKit
 
-class UpdateAccountAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.updateAccount
-    let browserTab: Int
+public class UpdateAccountAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.updateAccount
+    public let browserTab: Int
     let siteName: String
     let siteURL: String
     let accountId: String
@@ -20,13 +20,13 @@ class UpdateAccountAuthorizer: Authorizer {
     let newSiteName: String?
     let notes: String?
 
-    let requestText = "requests.update_account".localized.capitalizedFirstLetter
-    let successText = "requests.account_updated".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.update_account".localized.capitalizedFirstLetter
+    public let successText = "requests.account_updated".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return  String(format: "requests.update_this".localized, siteName)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab,
               let siteName = request.siteName,
@@ -45,7 +45,7 @@ class UpdateAccountAuthorizer: Authorizer {
         Logger.shared.analytics(.updateAccountRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)

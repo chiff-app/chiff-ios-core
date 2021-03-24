@@ -8,22 +8,22 @@
 import LocalAuthentication
 import PromiseKit
 
-class ChangeAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.change
-    let browserTab: Int
+public class ChangeAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.change
+    public let browserTab: Int
     let siteName: String
     let siteURL: String
     let siteId: String
     let accountId: String
 
-    let requestText = "requests.change_password".localized.capitalizedFirstLetter
-    let successText = "requests.new_password_generated".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.change_password".localized.capitalizedFirstLetter
+    public let successText = "requests.new_password_generated".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return String(format: "requests.change_for".localized, siteName)
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab,
               let siteName = request.siteName,
@@ -40,7 +40,7 @@ class ChangeAuthorizer: Authorizer {
         Logger.shared.analytics(.changePasswordRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
         return firstly {
             when(fulfilled: LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false),

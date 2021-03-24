@@ -9,7 +9,7 @@ import Foundation
 import CryptoKit
 
 @available(iOS 13.0, *)
-extension Crypto {
+public extension Crypto {
 
     /// Create a ECDSA signing keypair. This is used for WebAuthn.
     /// - Parameter seed: Optionally, the seed to use for the private key. Will be randomly generated if not provided.

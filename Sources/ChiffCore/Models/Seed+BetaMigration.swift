@@ -11,7 +11,7 @@ import PromiseKit
 extension Seed {
 
     /// Move this seed from the beta environment to the production environment.
-    static func moveToProduction() -> Promise<Void> {
+    public static func moveToProduction() -> Promise<Void> {
         do {
             guard Properties.environment == .beta && !Properties.migrated else {
                 return .value(())

@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PairingResponse: Encodable {
+public protocol PairingResponse: Encodable {
     var sessionID: String { get }
     var pubKey: String { get }
     var browserPubKey: String { get }
@@ -43,7 +43,8 @@ struct BrowserPairingResponse: PairingResponse {
          version: Int,
          organisationKey: String?,
          organisationType: OrganisationType?,
-         isAdmin: Bool?) throws {
+         isAdmin: Bool?,
+         accounts: [String: SessionAccount]) throws {
         self.sessionID = id
         self.pubKey = pubKey
         self.browserPubKey = browserPubKey
@@ -55,7 +56,7 @@ struct BrowserPairingResponse: PairingResponse {
             throw SessionError.noEndpoint
         }
         self.arn = endpoint
-        self.accounts = try UserAccount.combinedSessionAccounts()
+        self.accounts = accounts
         self.errorLogging = Properties.errorLogging
         self.analyticsLogging = Properties.analyticsLogging
         self.appVersion = Properties.version

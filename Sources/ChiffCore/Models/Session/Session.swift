@@ -14,7 +14,7 @@ import UserNotifications
 import LocalAuthentication
 import PromiseKit
 
-enum SessionError: Error {
+public enum SessionError: Error {
     case exists
     case doesntExist
     case invalid
@@ -40,7 +40,7 @@ enum MessageType: String {
     case pairing, volatile, persistent, push
 }
 
-protocol Session: Codable {
+public protocol Session: Codable {
 
     var creationDate: Date { get }
     var id: String { get }
@@ -68,7 +68,7 @@ protocol Session: Codable {
 }
 
 // Shared functions for BrowserSession and TeamSession
-extension Session {
+public extension Session {
 
     static var count: Int {
         get { return UserDefaults.standard.integer(forKey: Self.sessionCountFlag) }

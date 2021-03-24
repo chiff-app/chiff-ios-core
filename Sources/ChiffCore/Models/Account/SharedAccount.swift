@@ -12,30 +12,30 @@ import AuthenticationServices
 import PromiseKit
 
 /// `SharedAccount`s are managed by a `TeamSession`.
-struct SharedAccount: Account {
-    let id: String
-    var username: String
-    var sites: [Site]
-    var passwordIndex: Int
-    var passwordOffset: [Int]?
-    var askToLogin: Bool?
-    var askToChange: Bool? = false
-    let sessionId: String
-    var version: Int
-    var timesUsed: Int
-    var lastTimeUsed: Date?
+public struct SharedAccount: Account {
+    public let id: String
+    public var username: String
+    public var sites: [Site]
+    public var passwordIndex: Int
+    public var passwordOffset: [Int]?
+    public var askToLogin: Bool?
+    public var askToChange: Bool? = false
+    public let sessionId: String
+    public var version: Int
+    public var timesUsed: Int
+    public var lastTimeUsed: Date?
 
-    var site: Site {
+    public var site: Site {
         return sites.first!
     }
-    var hasPassword: Bool {
+    public var hasPassword: Bool {
         return true
     }
 
-    static let keychainService: KeychainService = .sharedAccount()
-    static let otpService: KeychainService = .sharedAccount(attribute: .otp)
-    static let notesService: KeychainService = .sharedAccount(attribute: .notes)
-    static let webAuthnService: KeychainService = .sharedAccount(attribute: .webauthn)
+    public static let keychainService: KeychainService = .sharedAccount()
+    public static let otpService: KeychainService = .sharedAccount(attribute: .otp)
+    public static let notesService: KeychainService = .sharedAccount(attribute: .notes)
+    public static let webAuthnService: KeychainService = .sharedAccount(attribute: .webauthn)
 
     init(id: String, username: String, sites: [Site], passwordIndex: Int, passwordOffset: [Int]?, version: Int, sessionId: String) {
         self.id = id
@@ -56,7 +56,7 @@ struct SharedAccount: Account {
     ///   - context: Optionally, an authenticated `LAContext`.
     /// - Throws: Keychain and decoding related errors.
     /// - Returns: A boolean whether something has been updated.
-    mutating func sync(accountData: Data, key: Data, context: LAContext? = nil) throws -> Bool {
+    public mutating func sync(accountData: Data, key: Data, context: LAContext? = nil) throws -> Bool {
         let decoder = JSONDecoder()
         let backupAccount = try decoder.decode(BackupSharedAccount.self, from: accountData)
         let notesChanged = try updateNotes(notes: backupAccount.notes)
@@ -81,7 +81,7 @@ struct SharedAccount: Account {
     }
 
     // Documentation in protocol
-    func delete() -> Promise<Void> {
+    public func delete() -> Promise<Void> {
         do {
             try Keychain.shared.delete(id: self.id, service: .sharedAccount())
             try? Keychain.shared.delete(id: self.id, service: Self.notesService)
@@ -93,10 +93,10 @@ struct SharedAccount: Account {
     }
 
     // Documentation in protocol
-    func update(secret: Data?, backup: Bool = false) throws {
+    public func update(secret: Data?, backup: Bool = false) throws {
         let accountData = try PropertyListEncoder().encode(self as Self)
         try Keychain.shared.update(id: id, service: Self.keychainService, secretData: secret, objectData: accountData, context: nil)
-        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: self as Self) })
+        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: SessionAccount(account: self as Self)) })
         saveToIdentityStore()
     }
 
@@ -157,7 +157,7 @@ struct SharedAccount: Account {
     private func save(password: String, sessionId: String) throws {
         let accountData = try PropertyListEncoder().encode(self)
         try Keychain.shared.save(id: id, service: Self.keychainService, secretData: password.data, objectData: accountData, label: sessionId)
-        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: self) })
+        try BrowserSession.all().forEach({ _ = try $0.updateSessionAccount(account: SessionAccount(account: self)) })
         saveToIdentityStore()
     }
 
@@ -218,7 +218,7 @@ extension SharedAccount: Codable {
         case lastTimeUsed
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.username = try values.decode(String.self, forKey: .username)

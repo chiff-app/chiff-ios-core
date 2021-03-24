@@ -11,19 +11,19 @@ import PromiseKit
 
 extension TeamSession: Syncable {
 
-    typealias BackupType = BackupTeamSession
+    public typealias BackupType = BackupTeamSession
 
-    static var syncEndpoint: SyncEndpoint {
+    public static var syncEndpoint: SyncEndpoint {
         return .sessions
     }
 
     // Documentation in protocol
-    static func all(context: LAContext?) throws -> [String: TeamSession] {
+    public static func all(context: LAContext?) throws -> [String: TeamSession] {
         return try Dictionary(uniqueKeysWithValues: all().map { ($0.id, $0) })
     }
 
     // Documentation in protocol
-    static func create(backupObject: BackupTeamSession, context: LAContext?) throws {
+    public static func create(backupObject: BackupTeamSession, context: LAContext?) throws {
         let session = try TeamSession(from: backupObject, context: context)
         _ = session.update().catch { error in
             Logger.shared.warning("Failed to update shared accounts after creating team session from backup", error: error)
@@ -31,7 +31,7 @@ extension TeamSession: Syncable {
     }
 
     // Documentation in protocol
-    static func notifyObservers() {
+    public static func notifyObservers() {
         NotificationCenter.default.postMain(name: .sessionUpdated, object: self)
     }
 
@@ -52,7 +52,7 @@ extension TeamSession: Syncable {
     }
 
     // Documentation in protocol
-    mutating func update(with backupObject: BackupTeamSession, context: LAContext?) throws -> Bool {
+    public mutating func update(with backupObject: BackupTeamSession, context: LAContext?) throws -> Bool {
         var newSeed: Data?
         if let seed = try Keychain.shared.get(id: SessionIdentifier.sharedSeed.identifier(for: self.id), service: Self.signingService), !Crypto.shared.equals(first: backupObject.seed, second: seed) {
             newSeed = backupObject.seed
@@ -75,12 +75,12 @@ extension TeamSession: Syncable {
     }
 
     /// Default empty implementation, because TeamSessions are not deleted by syncing.
-    func deleteFromKeychain() -> Promise<Void> {
+    public func deleteFromKeychain() -> Promise<Void> {
         return .value(())
     }
 
     // Documentation in protocol
-    func backup() -> Promise<Void> {
+    public func backup() -> Promise<Void> {
         do {
             guard let seed = try Keychain.shared.get(id: SessionIdentifier.sharedSeed.identifier(for: self.id), service: TeamSession.signingService), created else {
                 return .value(())
@@ -107,14 +107,14 @@ extension TeamSession: Syncable {
 
 }
 
-struct BackupTeamSession: BackupObject {
+public struct BackupTeamSession: BackupObject {
     let id: String
     let teamId: String
     let seed: Data
     let privKey: Data
     let title: String
     let version: Int
-    var lastChange: Timestamp
+    public var lastChange: Timestamp
     let creationDate: Timestamp
     let organisationKey: Data
 
@@ -142,7 +142,7 @@ struct BackupTeamSession: BackupObject {
         self.organisationKey = organisationKey
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try values.decode(String.self, forKey: .id)
         self.teamId = try values.decode(String.self, forKey: .teamId)

@@ -8,20 +8,20 @@
 import LocalAuthentication
 import PromiseKit
 
-class BulkLoginAuthorizer: Authorizer {
-    var session: BrowserSession
-    let type = ChiffMessageType.bulkLogin
-    let browserTab: Int
+public class BulkLoginAuthorizer: Authorizer {
+    public var session: BrowserSession
+    public let type = ChiffMessageType.bulkLogin
+    public let browserTab: Int
     let count: Int
     let accountIds: [Int: String]
 
-    let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
-    let successText = "requests.login_succesful".localized.capitalizedFirstLetter
-    var authenticationReason: String {
+    public let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
+    public let successText = "requests.login_succesful".localized.capitalizedFirstLetter
+    public var authenticationReason: String {
         return String(format: "requests.login_to".localized, "\(accountIds.count) tabs")
     }
 
-    required init(request: ChiffRequest, session: BrowserSession) throws {
+    public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab,
               let accountIds = request.accountIDs else {
@@ -33,7 +33,7 @@ class BulkLoginAuthorizer: Authorizer {
         Logger.shared.analytics(.bulkLoginRequestOpened)
     }
 
-    func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
+    public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
         }.map { context in

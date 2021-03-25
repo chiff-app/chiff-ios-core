@@ -1,6 +1,6 @@
 //
 //  Keychain+Migration.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

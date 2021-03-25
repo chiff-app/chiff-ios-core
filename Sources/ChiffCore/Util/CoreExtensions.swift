@@ -1,6 +1,6 @@
 //
 //  CoreExtensions.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -9,8 +9,8 @@ import Foundation
 import Sodium
 import OneTimePassword
 import PromiseKit
-import Kronos
 import DataCompression
+import Kronos
 
 // MARK: - Primitive extensions
 
@@ -216,6 +216,11 @@ public extension Date {
         let components = calendar.dateComponents(unitFlags, from: self, to: now)
         let formatter = DateComponentUnitFormatter()
         return formatter.string(forDateComponents: components, useNumericDates: useNumericDates)
+    }
+
+    /// Sync the clock with the NTP server.
+    static func sync() {
+        Clock.sync()
     }
 }
 

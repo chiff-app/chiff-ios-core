@@ -1,6 +1,6 @@
 //
 //  Protocols.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -16,4 +16,3 @@ public protocol PairContainerDelegate: AnyObject {
     func startLoading()
     func finishLoading()
 }
-

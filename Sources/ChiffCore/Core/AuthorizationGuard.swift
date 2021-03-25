@@ -1,6 +1,6 @@
 //
 //  AuthorizationGuard.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

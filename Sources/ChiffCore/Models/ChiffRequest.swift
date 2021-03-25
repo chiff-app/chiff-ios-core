@@ -1,6 +1,6 @@
 //
-//  ChiffRequest.swift
-//  chiff
+//  ChiffCoreRequest.swift
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

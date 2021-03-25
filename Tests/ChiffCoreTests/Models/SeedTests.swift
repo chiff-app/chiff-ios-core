@@ -1,6 +1,6 @@
 //
 //  SeedTests.swift
-//  chiffTests
+//  ChiffCoreTests
 //
 //  Copyright: see LICENSE.md
 //

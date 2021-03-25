@@ -1,6 +1,6 @@
 //
 //  Localizer.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -109,7 +109,6 @@ public class Localizer: LocalizerProtocol {
         return attributedString
     }
     #endif
-
 
     func localizedGroup(string: String) -> NSDictionary {
         var localizableGroup = localizableDictionary!

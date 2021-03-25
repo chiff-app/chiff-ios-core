@@ -1,6 +1,6 @@
 //
 //  PasswordValidator.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

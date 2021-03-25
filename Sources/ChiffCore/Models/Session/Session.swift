@@ -1,6 +1,6 @@
 //
 //  Session.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

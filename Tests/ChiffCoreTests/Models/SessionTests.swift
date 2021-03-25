@@ -1,6 +1,6 @@
 //
 //  SessionTests.swift
-//  chiffTests
+//  ChiffCoreTests
 //
 //  Copyright: see LICENSE.md
 //

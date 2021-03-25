@@ -1,6 +1,6 @@
 //
 //  Constants.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -87,37 +87,6 @@ public enum AnalyticsEvent: String {
     case analytics = "Analytics"
 }
 
-public enum AnalyticsEventProperty: String {
-    case timestamp = "Timestamp"
-    case value = "Value" // True or false
-    case scheme = "Scheme" // Of QR-code
-    case username = "Username"
-    case password = "Password"
-    case url = "URL"
-    case siteName = "SiteName"
-}
-
-enum MessageParameter {
-    static let body = "body"
-    static let receiptHandle = "receiptHandle"
-    static let type = "type"
-}
-
-enum NotificationContentKey: String {
-    case browserTab
-    case data
-    case password
-    case sessionID
-    case siteID
-    case siteName
-    case siteURL
-    case type
-    case username
-    case accounts
-    case userTeamSessions
-    case sessions
-}
-
 /**
  * Keyn messages go app <-> browser
  *
@@ -147,4 +116,35 @@ public enum ChiffMessageType: Int, Codable {
     case getDetails = 19
     case updateAccount = 20
     case createOrganisation = 21
+}
+
+public enum AnalyticsEventProperty: String {
+    case timestamp = "Timestamp"
+    case value = "Value" // True or false
+    case scheme = "Scheme" // Of QR-code
+    case username = "Username"
+    case password = "Password"
+    case url = "URL"
+    case siteName = "SiteName"
+}
+
+enum MessageParameter {
+    static let body = "body"
+    static let receiptHandle = "receiptHandle"
+    static let type = "type"
+}
+
+enum NotificationContentKey: String {
+    case browserTab
+    case data
+    case password
+    case sessionID
+    case siteID
+    case siteName
+    case siteURL
+    case type
+    case username
+    case accounts
+    case userTeamSessions
+    case sessions
 }

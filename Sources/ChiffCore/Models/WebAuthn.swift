@@ -1,6 +1,6 @@
 //
 //  WebAuthn.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -50,23 +50,7 @@ public struct WebAuthn: Equatable {
     var counter: Int = 0
 
     static let cryptoContext = "webauthn"
-//    static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
-    static let AAGUID = Data([UInt8](arrayLiteral:     0xd6,
-                                     0xd0,
-                                     0xbd,
-                                     0xc3,
-                                     0x62,
-                                     0xee,
-                                     0xc4,
-                                     0xdb,
-                                     0xde,
-                                     0x8d,
-                                     0x7a,
-                                     0x65,
-                                     0x6e,
-                                     0x4a,
-                                     0x44,
-                                     0x87))
+    static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
 
     /// Create a new WebAuthn object.
     /// - Parameters:

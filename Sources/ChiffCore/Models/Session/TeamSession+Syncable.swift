@@ -1,6 +1,6 @@
 //
 //  TeamSession+Restorable.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

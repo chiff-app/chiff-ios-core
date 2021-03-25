@@ -1,6 +1,6 @@
 //
 //  Account+AuthenticationServices.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

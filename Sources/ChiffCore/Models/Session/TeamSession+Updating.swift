@@ -1,6 +1,6 @@
 //
 //  TeamSession+Updating.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

@@ -1,6 +1,6 @@
 //
 //  Logger.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -67,7 +67,7 @@ public extension LoggerProtocol {
 
 public struct Logger: LoggerProtocol {
 
-    static var shared: LoggerProtocol = Logger()
+    public static var shared: LoggerProtocol = Logger()
 
     public func setUserId(userId: String?) {
         print("UserID set to \(userId ?? "no userid")")
@@ -77,17 +77,22 @@ public struct Logger: LoggerProtocol {
         print("Analytics set to \(value)")
     }
 
-    public func warning(_ message: String, error: Error? = nil, userInfo: [String: Any]? = nil, _ file: StaticString = #file, _ function: StaticString = #function, _ line: UInt = #line) {
+    public func warning(_ message: String,
+                        error: Error? = nil,
+                        userInfo: [String: Any]? = nil,
+                        _ file: StaticString = #file,
+                        _ function: StaticString = #function,
+                        _ line: UInt = #line) {
         print("--------- ⚠️ WARNING: \(String(describing: error)). \(message) ---------")
     }
 
     public func error(_ message: String,
-               error: Error? = nil,
-               userInfo: [String: Any]? = nil,
-               override: Bool = false,
-               _ file: StaticString = #file,
-               _ function: StaticString = #function,
-               _ line: UInt = #line) {
+                      error: Error? = nil,
+                      userInfo: [String: Any]? = nil,
+                      override: Bool = false,
+                      _ file: StaticString = #file,
+                      _ function: StaticString = #function,
+                      _ line: UInt = #line) {
         print("--------- ☠️ ERROR: \(String(describing: error)). \(message) --------- ")
     }
 

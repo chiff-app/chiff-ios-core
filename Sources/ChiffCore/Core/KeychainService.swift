@@ -1,6 +1,6 @@
 //
 //  KeychainService.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -36,7 +36,7 @@ public enum KeychainService {
         case topsecret
     }
 
-    var service: String {
+    public var service: String {
         switch self {
         case .account(let attribute):
             if let attribute = attribute {
@@ -82,7 +82,7 @@ public enum KeychainService {
     }
 
     /// The `accessGroup` is used to determine whether item are accessible from the extensions.
-    var accessGroup: String {
+    public var accessGroup: String {
         switch self.classification {
         case .restricted:
             return "35MFYY2JY5.io.keyn.restricted"

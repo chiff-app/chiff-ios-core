@@ -1,6 +1,6 @@
 //
 //  Seed+BetaMigration.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //

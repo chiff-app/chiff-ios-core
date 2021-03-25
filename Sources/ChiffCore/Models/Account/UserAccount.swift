@@ -1,6 +1,6 @@
 //
 //  UserAccount.swift
-//  chiff
+//  ChiffCore
 //
 //  Copyright: see LICENSE.md
 //
@@ -48,14 +48,14 @@ public struct UserAccount: Account, Equatable {
     ///   - offline: If this is true, no remote calls should be made (creating the backup and the session accounts).
     /// - Throws: Keychain or password generation errors.
     public init(username: String,
-         sites: [Site],
-         password: String?,
-         rpId: String?,
-         algorithms: [WebAuthnAlgorithm]?,
-         notes: String?,
-         askToChange: Bool?,
-         context: LAContext? = nil,
-         offline: Bool = false) throws {
+                sites: [Site],
+                password: String?,
+                rpId: String?,
+                algorithms: [WebAuthnAlgorithm]?,
+                notes: String?,
+                askToChange: Bool?,
+                context: LAContext? = nil,
+                offline: Bool = false) throws {
         guard let id = "\(sites[0].id)_\(username)".hash else {
             throw CryptoError.hashing
         }
@@ -267,7 +267,13 @@ public struct UserAccount: Account, Equatable {
     ///   - askToChange: Whether the client should ask to change.
     ///   - context: Optionally, an authenticated `LAContext` object.
     /// - Throws: Keychain and password generation errors.
-    public mutating func update(username newUsername: String?, password newPassword: String?, siteName: String?, url: String?, askToLogin: Bool?, askToChange: Bool?, context: LAContext? = nil) throws {
+    public mutating func update(username newUsername: String?,
+                                password newPassword: String?,
+                                siteName: String?,
+                                url: String?,
+                                askToLogin: Bool?,
+                                askToChange: Bool?,
+                                context: LAContext? = nil) throws {
         if let newUsername = newUsername {
             self.username = newUsername
         }

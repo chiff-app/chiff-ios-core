@@ -93,7 +93,7 @@ class MockAPI: APIProtocol {
         switch id {
         // TODO: SHA256 hashes should be used here.
         case "465359316cf124ca28f33cfb920fdacba6506ae2329dfd18669b3c6a3f52fadc":
-            if let path = Bundle(for: type(of: self)).path(forResource: "samplePPD", ofType: "json") {
+            if let path = Bundle.module.path(forResource: "samplePPD", ofType: "json") {
                 do {
                     let fileUrl = URL(fileURLWithPath: path)
                     let data = try Data(contentsOf: fileUrl, options: .mappedIfSafe)
@@ -109,7 +109,7 @@ class MockAPI: APIProtocol {
         case "3":
             return .value(["nothing":[]])
         case "3ce8c236a3bd3307e737a8aa14b8a520f37b2e3386555c9a269141332f4c746e":
-            if let path = Bundle(for: type(of: self)).path(forResource: "sampleRedirectPPD", ofType: "json") {
+            if let path = Bundle.module.path(forResource: "sampleRedirectPPD", ofType: "json") {
                 do {
                     let fileUrl = URL(fileURLWithPath: path)
                     let data = try Data(contentsOf: fileUrl, options: .mappedIfSafe)

@@ -5,9 +5,6 @@
 //  Copyright: see LICENSE.md
 //
 
-#if canImport(UIKit)
-import UIKit
-#endif
 import OneTimePassword
 import LocalAuthentication
 import PromiseKit

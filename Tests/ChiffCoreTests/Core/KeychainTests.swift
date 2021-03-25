@@ -156,9 +156,9 @@ class KeychainTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Finish testGetAsyncThrowsIfInvalidContext")
         let context = LAContext()
         context.invalidate()
-        Keychain.shared.get(id: KeyIdentifier.master.identifier(for: .seed), service: .seed, reason: "Retrieve password", with: context, authenticationType: .ifNeeded).catch { error in
-            XCTFail(error.localizedDescription)
-        }.finally {
+        Keychain.shared.get(id: KeyIdentifier.master.identifier(for: .seed), service: .seed, reason: "Retrieve password", with: context, authenticationType: .ifNeeded).done { _ in
+            XCTFail("Should throw")
+        }.ensure {
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 3.0)

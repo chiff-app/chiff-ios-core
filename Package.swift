@@ -33,6 +33,6 @@ let package = Package(
         .testTarget(
             name: "ChiffCoreTests",
             dependencies: ["ChiffCore"],
-            exclude: ["samplePPD.json", "sampleRedirectPPD.json"])
+            resources: [.process("Resources")])
     ]
 )

@@ -34,7 +34,7 @@ public struct BrowserSession: Session {
     public var title: String
     #if canImport(UIKit)
     public var logo: UIImage? {
-        return UIImage(named: browser.rawValue)
+        return UIImage(named: browser.rawValue, in: Bundle.module, compatibleWith: nil)
     }
     #else
     public var logo: NSImage? {

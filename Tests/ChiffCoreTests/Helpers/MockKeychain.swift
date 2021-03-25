@@ -12,7 +12,7 @@ import PromiseKit
 
 class MockKeychain: KeychainProtocol {
 
-    var data = [String: (Data?,Data?)]()
+    var data = [String: (Data?,Any?)]()
     var keys  = [String: SecKeyConvertible]()
 
     func save(id identifier: String, service: KeychainService, secretData: Data?, objectData: Data?, label: String?) throws {
@@ -43,7 +43,10 @@ class MockKeychain: KeychainProtocol {
             guard let object = object else {
                 throw KeychainError.notFound
             }
-            return object
+            guard let dataObject = object as? Data else {
+                throw KeychainError.unexpectedData
+            }
+            return dataObject
         } else {
             return nil
         }
@@ -51,7 +54,10 @@ class MockKeychain: KeychainProtocol {
 
     func all(service: KeychainService, context: LAContext?, label: String?) throws -> [[String : Any]]? {
         try checkContext(context: context)
-        return data.filter({ $0.key.hasPrefix(service.service) }).map { [kSecAttrGeneric as String: $0.value.1 as Any] }
+        return data.filter({ $0.key.hasPrefix(service.service) }).map { [
+            kSecAttrGeneric as String: $0.value.1 as Any,
+            kSecAttrAccount as String: String($0.key.dropFirst(service.service.count + 1))
+        ] }
     }
 
     func update(id identifier: String, service: KeychainService, secretData: Data?, objectData: Data?, context: LAContext?) throws {
@@ -78,7 +84,11 @@ class MockKeychain: KeychainProtocol {
     }
 
     func deleteAll(service: KeychainService, label: String?) {
-        data.removeAll()
+        for item in data {
+            if item.key.hasPrefix(service.service) {
+                data.removeValue(forKey: item.key)
+            }
+        }
     }
 
     func saveKey<T>(id identifier: String, key: T) throws where T : SecKeyConvertible {

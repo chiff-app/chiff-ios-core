@@ -134,7 +134,12 @@ public extension Session {
                 sessions.append(session)
             } catch {
                 Logger.shared.error("Can not decode session", error: error)
-                guard let sessionId = dict[kSecAttrAccount as String] as? String, (try? Keychain.shared.delete(id: sessionId, service: Self.encryptionService)) != nil else {
+                do {
+                    guard let sessionId = dict[kSecAttrAccount as String] as? String else {
+                        throw CodingError.unexpectedData
+                    }
+                    try Keychain.shared.delete(id: sessionId, service: Self.encryptionService)
+                } catch {
                     purgeSessionDataFromKeychain()
                     return []
                 }

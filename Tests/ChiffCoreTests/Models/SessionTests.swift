@@ -341,7 +341,11 @@ class SessionTests: XCTestCase {
             try Keychain.shared.save(id: "\(notASession.id)-fake", service: .browserSession(attribute: .shared), secretData: "secret".data, objectData: encoder.encode(notASession))
             let sessions = try BrowserSession.all()
             XCTAssertEqual(sessions.count, 1)
-            XCTAssertEqual(sessions.first!.id, session.id)
+            guard let sess = sessions.first else {
+                XCTFail("Session not found")
+                return
+            }
+            XCTAssertEqual(sess.id, session.id)
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -418,29 +422,36 @@ class SessionTests: XCTestCase {
     // MARK: - Private functions
 
     private func saveWrongDataInKeychain(id identifier: Any, service: KeychainService, secretData: Data, objectData: Any) throws {
-        var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                    kSecAttrAccount as String: identifier,
-                                    kSecAttrService as String: service.service,
-                                    kSecAttrAccessGroup as String: service.accessGroup,
-                                    kSecValueData as String: secretData]
-        query[kSecAttrGeneric as String] = objectData
+        if Keychain.shared is MockKeychain {
+            (Keychain.shared as! MockKeychain).data["\(service.service)-\(identifier)"] = (secretData, objectData)
+            print((Keychain.shared as! MockKeychain).data)
+        } else {
+            // Testing with the real keychain.
+            var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                        kSecAttrAccount as String: identifier,
+                                        kSecAttrService as String: service.service,
+                                        kSecAttrAccessGroup as String: service.accessGroup,
+                                        kSecValueData as String: secretData]
+            query[kSecAttrGeneric as String] = objectData
 
-        switch service.classification {
-        case .restricted:
-            query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        case .secret:
-            query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        case .confidential, .topsecret:
-            let access = SecAccessControlCreateWithFlags(nil, // Use the default allocator.
-                kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-                .userPresence,
-                nil) // Ignore any error.
-            query[kSecAttrAccessControl as String] = access
+            switch service.classification {
+            case .restricted:
+                query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+            case .secret:
+                query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            case .confidential, .topsecret:
+                let access = SecAccessControlCreateWithFlags(nil, // Use the default allocator.
+                    kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                    .userPresence,
+                    nil) // Ignore any error.
+                query[kSecAttrAccessControl as String] = access
+            }
+
+            let status = SecItemAdd(query as CFDictionary, nil)
+            guard status == errSecSuccess else {
+                throw KeychainError.unhandledError(status.message)
+            }
         }
 
-        let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw KeychainError.unhandledError(status.message)
-        }
     }
 }

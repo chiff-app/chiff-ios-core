@@ -49,21 +49,21 @@ class WebAuthnTests: XCTestCase {
 
     // MARK: - Unit tests
 
-    @available(iOS 14.0, *)
-    func test() {
-        let pubKey = "pQECAyYgASFYIBglJ1I0mYojBugIJ3g5gBAcMZnhneY99t-K2NwLvceNIlggD9Z3ufKHPpBKtphU_WCwmTbGxjQ_sFTvMPBKuVCO6Os"
-        let signature = "MEYCIQDUzbfvSFkmLNpVnYjIrUNrCDhx1Ei-IPiBE9S_Cd9sVQIhAMCY-GuxzwNirKVhNiyEbPOx6tuBowDPvAMHPlu2LYCQ"
+//    @available(iOS 14.0, *)
+//    func test() {
+//        let pubKey = "pQECAyYgASFYIBglJ1I0mYojBugIJ3g5gBAcMZnhneY99t-K2NwLvceNIlggD9Z3ufKHPpBKtphU_WCwmTbGxjQ_sFTvMPBKuVCO6Os"
+//        let signature = "MEYCIQDUzbfvSFkmLNpVnYjIrUNrCDhx1Ei-IPiBE9S_Cd9sVQIhAMCY-GuxzwNirKVhNiyEbPOx6tuBowDPvAMHPlu2LYCQ"
 //        let authData = " SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2PFAAAAAXMHIS7G25hezYBV9kofEAcAICuNEbvooa1amnzeZy3mWd_8zO5mOAzQ82iC5rmS3OQ6pQECAyYgASFYIBglJ1I0mYojBugIJ3g5gBAcMZnhneY99t-K2NwLvceNIlggD9Z3ufKHPpBKtphU_WCwmTbGxjQ_sFTvMPBKuVCO6Oug"
 //        let clientDataHash = "v6eJABD95IrTTm57dfkr6NOv8r6-YQBBIS7A28IlA-I"
-        let challenge = " SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2PFAAAAAXMHIS7G25hezYBV9kofEAcAICuNEbvooa1amnzeZy3mWd_8zO5mOAzQ82iC5rmS3OQ6pQECAyYgASFYIBglJ1I0mYojBugIJ3g5gBAcMZnhneY99t-K2NwLvceNIlggD9Z3ufKHPpBKtphU_WCwmTbGxjQ_sFTvMPBKuVCO6Ougv6eJABD95IrTTm57dfkr6NOv8r6-YQBBIS7A28IlA-I"
-        do {
-            let sig = try P256.Signing.ECDSASignature(derRepresentation: signature.fromBase64!)
-            let pk = try P256.Signing.PublicKey(derRepresentation: pubKey.fromBase64!)
-            XCTAssertTrue(pk.isValidSignature(sig, for: challenge.fromBase64!))
-        } catch {
-            XCTFail("Error: \(error)")
-        }
-    }
+//        let challenge = " SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2PFAAAAAXMHIS7G25hezYBV9kofEAcAICuNEbvooa1amnzeZy3mWd_8zO5mOAzQ82iC5rmS3OQ6pQECAyYgASFYIBglJ1I0mYojBugIJ3g5gBAcMZnhneY99t-K2NwLvceNIlggD9Z3ufKHPpBKtphU_WCwmTbGxjQ_sFTvMPBKuVCO6Ougv6eJABD95IrTTm57dfkr6NOv8r6-YQBBIS7A28IlA-I"
+//        do {
+//            let sig = try P256.Signing.ECDSASignature(derRepresentation: signature.fromBase64!)
+//            let pk = try P256.Signing.PublicKey(derRepresentation: pubKey.fromBase64!)
+//            XCTAssertTrue(pk.isValidSignature(sig, for: challenge.fromBase64!))
+//        } catch {
+//            XCTFail("Error: \(error)")
+//        }
+//    }
 
 //    func testECDSA256Attestation() {
 //        do {

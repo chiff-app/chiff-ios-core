@@ -7,6 +7,18 @@
 
 import Foundation
 
+public struct ChiffCore {
+    /// Initialize the Chiff Core, overriding the logger and localizer. Also syncs clock with NTP.
+    /// - Parameters:
+    ///   - logger: The logger.
+    ///   - localizer: The localizer.
+    public static func initialize(logger: LoggerProtocol, localizer: LocalizerProtocol) {
+        Logger.shared = logger
+        Localizer.shared = localizer
+        Date.sync()
+    }
+}
+
 public enum AnalyticsUserProperty: String {
     case accountCount = "Number of accounts"
     case pairingCount = "Number of pairings"
@@ -134,7 +146,7 @@ enum MessageParameter {
     static let type = "type"
 }
 
-enum NotificationContentKey: String {
+public enum NotificationContentKey: String {
     case browserTab
     case data
     case password

@@ -51,6 +51,7 @@ public struct WebAuthn: Equatable {
 
     static let cryptoContext = "webauthn"
     static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
+    static let attestationPrivKey = "MHcCAQEEICs2XglGkEQpfGena9gpYwtBzlRn1iNAWhmrwhcyot-6oAoGCCqGSM49AwEHoUQDQgAEsc1m92yu5MLQyE1x9DSYZqQ6kbeKs__FH2wQBXqjDZC6Jqv2VKcv1kx9Vd5D7X4hswvKy0pw3UdiP2vVgiQJPQ"
 
     /// Create a new WebAuthn object.
     /// - Parameters:
@@ -198,7 +199,7 @@ public struct WebAuthn: Equatable {
         return (try sign(accountId: accountId, data: data), counter)
     }
 
-    /// Get a self-signed WebAuthn attestation
+    /// Get a WebAuthn attestation
     /// - Parameters:
     ///   - accountId: The account id.
     /// - Throws: Keychain, Crypto or WebAuthn errors.
@@ -207,19 +208,14 @@ public struct WebAuthn: Equatable {
         let authData = try createAuthenticatorData(accountId: accountId, extensions: extensions)
         let clientDataHash = try Crypto.shared.convertFromBase64(from: clientData)
         let data = authData + clientDataHash
-//        let signature = try sign(accountId: accountId, data: data)
-        guard #available(iOS 13.0, *) else {
+        guard #available(iOS 14.0, *) else {
             throw WebAuthnError.notSupported
         }
-        let trezorPrivKey = try P256.Signing.PrivateKey(rawRepresentation: "cSasK_ZE3GGGrYPvH83xKle1z6IAC4rQJ-lW6FTFCos".fromBase64!)
-        let signature = try trezorPrivKey.signature(for: data)
-        print("Auth data: \(authData.base64)")
-        print("Client data hash: \(clientDataHash.base64)")
-        print("Sig data: \(data.base64)")
-        print("Pub key: \(trezorPrivKey.publicKey.rawRepresentation.base64)")
-        print("Signature: \(signature.derRepresentation.base64)")
+        let privKey = try P256.Signing.PrivateKey(derRepresentation: WebAuthn.attestationPrivKey.fromBase64!)
+        let signature = try privKey.signature(for: data)
         return (signature.derRepresentation.base64, counter, data)
     }
+
 
     // MARK: - Private functions
 
@@ -233,54 +229,62 @@ public struct WebAuthn: Equatable {
         data.append(UInt8((counter >> 8) & 0xff))
         data.append(UInt8((counter >> 0) & 0xff))
         if let accountId = accountId {
-            data[32] |= 1 << 6 // Set attestation flag
-            let accountIdData = try Crypto.shared.fromHex(accountId).prefix(16)
-            data.append(WebAuthn.AAGUID)
-            data.append(UInt8((accountIdData.count >> 8) & 0xff))
-            data.append(UInt8(accountIdData.count & 0xff))
-            data.append(accountIdData)
-            switch algorithm {
-            case .edDSA:
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa4, 0x01, 0x01, 0x03, 0x27, 0x20, 0x06, 0x21, 0x58, 0x20))
-                data.append(try pubKey(accountId: accountId))
-            case .ECDSA256:
-                let pubkey: Data = try pubKey(accountId: accountId)
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01, 0x21, 0x58, 0x20))
-                data.append(pubkey.prefix(algorithm.keyLength))
-                data.append(contentsOf: [0x22, 0x58, 0x20])
-                data.append(pubkey.suffix(algorithm.keyLength))
-            case .ECDSA384:
-                let pubkey: Data = try pubKey(accountId: accountId)
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x22, 0x20, 0x02, 0x21, 0x58, 0x30))
-                data.append(pubkey.prefix(algorithm.keyLength))
-                data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x30))
-                data.append(pubkey.suffix(algorithm.keyLength))
-            case .ECDSA512:
-                let pubkey: Data = try pubKey(accountId: accountId)
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x23, 0x20, 0x03, 0x21, 0x58, 0x42))
-                data.append(pubkey.prefix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
-                data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x42))
-                data.append(pubkey.suffix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
-            }
+            try appendAttestation(data: &data, accountId: accountId)
         }
         if let extensions = extensions {
-            var count = 0
-            var extensionData = Data()
-            if extensions.credentialProtectionPolicy != nil {
-                count += 1
-                extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, 0x01))
-            }
-            if let hmac = extensions.hmacSecret, hmac {
-                count += 1
-                extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x68, 0x6D, 0x61, 0x63, 0x2D, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0xf5))
-            }
-            if !extensionData.isEmpty {
-                data[32] |= 1 << 7 // Set extension flag
-                data.append(UInt8(0xa0 + count))
-                data.append(extensionData)
-            }
+            appendExtensions(data: &data, extensions: extensions)
         }
         return data
+    }
+
+    private func appendAttestation(data: inout Data, accountId: String) throws {
+        data[32] |= 1 << 6 // Set attestation flag
+        let accountIdData = try Crypto.shared.fromHex(accountId).prefix(16)
+        data.append(WebAuthn.AAGUID)
+        data.append(UInt8((accountIdData.count >> 8) & 0xff))
+        data.append(UInt8(accountIdData.count & 0xff))
+        data.append(accountIdData)
+        switch algorithm {
+        case .edDSA:
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa4, 0x01, 0x01, 0x03, 0x27, 0x20, 0x06, 0x21, 0x58, 0x20))
+            data.append(try pubKey(accountId: accountId))
+        case .ECDSA256:
+            let pubkey: Data = try pubKey(accountId: accountId)
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01, 0x21, 0x58, 0x20))
+            data.append(pubkey.prefix(algorithm.keyLength))
+            data.append(contentsOf: [0x22, 0x58, 0x20])
+            data.append(pubkey.suffix(algorithm.keyLength))
+        case .ECDSA384:
+            let pubkey: Data = try pubKey(accountId: accountId)
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x22, 0x20, 0x02, 0x21, 0x58, 0x30))
+            data.append(pubkey.prefix(algorithm.keyLength))
+            data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x30))
+            data.append(pubkey.suffix(algorithm.keyLength))
+        case .ECDSA512:
+            let pubkey: Data = try pubKey(accountId: accountId)
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x23, 0x20, 0x03, 0x21, 0x58, 0x42))
+            data.append(pubkey.prefix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
+            data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x42))
+            data.append(pubkey.suffix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
+        }
+    }
+
+    private func appendExtensions(data: inout Data, extensions: WebAuthnExtensions) {
+        var count = 0
+        var extensionData = Data()
+        if extensions.credentialProtectionPolicy != nil {
+            count += 1
+            extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, 0x01))
+        }
+        if let hmac = extensions.hmacSecret, hmac {
+            count += 1
+            extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x68, 0x6D, 0x61, 0x63, 0x2D, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0xf5))
+        }
+        if !extensionData.isEmpty {
+            data[32] |= 1 << 7 // Set extension flag
+            data.append(UInt8(0xa0 + count))
+            data.append(extensionData)
+        }
     }
 
     private func sign(accountId: String, data: Data) throws -> String {
@@ -320,33 +324,6 @@ public struct WebAuthn: Equatable {
             return signature.derRepresentation.base64
         }
     }
-//
-//    private func generateX509Certificate(key: Data) -> Data {
-//        var result = Data()
-//
-//        let encodingLength: Int = (key.count + 1).encodedOctets().count
-//        let OID: [UInt8] = [0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-//            0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05, 0x00]
-//
-//        // ASN.1 SEQUENCE
-//        result.append(0x30)
-//
-//        // Overall size, made of OID + bitstring encoding + actual key
-//        let size = OID.count + 2 + encodingLength + key.count
-//        let encodedSize = size.encodedOctets()
-//        result.append(contentsOf: encodedSize)
-//        result.append(contentsOf: OID)
-//
-//        result.append(0x03)
-//        result.append(contentsOf: (key.count + 1).encodedOctets())
-//        result.append(0x00)
-//
-//        // Actual key bytes
-//
-//        result.append(key)
-//
-//        return result as Data
-//    }
 
 }
 
@@ -372,24 +349,3 @@ extension WebAuthn: Codable {
         self.counter = try values.decode(Int.self, forKey: .counter)
     }
 }
-
-//extension Int {
-//    func encodedOctets() -> [UInt8] {
-//        // Short form
-//        if self < 128 {
-//            return [UInt8(self)];
-//        }
-//
-//        // Long form
-//        let i = Int(log2(Double(self)) / 8 + 1)
-//        var len = self
-//        var result: [UInt8] = [UInt8(i + 0x80)]
-//
-//        for _ in 0..<i {
-//            result.insert(UInt8(len & 0xFF), at: 1)
-//            len = len >> 8
-//        }
-//
-//        return result
-//    }
-//}

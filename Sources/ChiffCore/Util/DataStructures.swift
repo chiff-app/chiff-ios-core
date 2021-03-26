@@ -190,6 +190,9 @@ public enum KeyIdentifier: String, Codable {
     case subscription
     case endpoint
 
+    // Attestation
+    case attestation
+
     public func identifier(for keychainService: KeychainService) -> String {
         return "\(keychainService.service).\(self.rawValue)"
     }

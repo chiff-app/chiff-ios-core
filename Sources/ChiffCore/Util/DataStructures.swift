@@ -138,6 +138,7 @@ struct KeynCredentialsResponse: Codable {
     var accounts: [Int: BulkLoginAccount?]?
     var notes: String?
     var teamId: String?
+    var certificates: [Data]?
 
     enum CodingKeys: String, CodingKey {
         case username = "u"
@@ -154,6 +155,7 @@ struct KeynCredentialsResponse: Codable {
         case accounts = "d"
         case notes = "y"
         case teamId = "i"
+        case certificates = "c"
     }
 
 }

@@ -54,7 +54,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
         var success = false
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
-        }.map { context in
+        }.then { (context: LAContext) -> Promise<(UserAccount, WebAuthnAttestation?, LAContext)> in
             let site = Site(name: self.siteName, id: self.siteId, url: self.siteURL, ppd: nil)
             var account = try UserAccount(username: self.username,
                                           sites: [site],
@@ -64,15 +64,19 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
                                           notes: nil,
                                           askToChange: false,
                                           context: context)
-            var signature: String?
-            var counter: Int?
             if let clientDataHash = self.clientDataHash {
-                (signature, counter) = try account.webAuthnAttestation(clientData: clientDataHash, extensions: self.extensions)
+                return account.webAuthn!.signAttestation(accountId: account.id, clientData: clientDataHash, extensions: self.extensions).map { (account, $0, context) }
+            } else { // No attestation
+                return .value((account, nil, context))
             }
-            try self.session.sendWebAuthnResponse(account: account, browserTab: self.browserTab, type: self.type, context: context, signature: signature, counter: counter)
+        }.map { (account, attestation, context) in
+            try self.session.sendWebAuthnResponse(account: account, browserTab: self.browserTab, type: self.type, context: context, signature: attestation?.signature, counter: attestation?.counter, certificates: attestation?.certificates)
             NotificationCenter.default.postMain(name: .accountsLoaded, object: nil)
             success = true
-            return nil
+            var account = account
+            account.lastChange = Date.now
+            try account.update(secret: nil)
+            return account
         }.ensure {
             Logger.shared.analytics(.webAuthnCreateRequestAuthorized, properties: [.value: success])
         }

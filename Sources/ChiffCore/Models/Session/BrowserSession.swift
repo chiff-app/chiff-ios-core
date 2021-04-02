@@ -217,7 +217,8 @@ public struct BrowserSession: Session {
                                        type: ChiffMessageType,
                                        context: LAContext,
                                        signature: String?,
-                                       counter: Int?) throws {
+                                       counter: Int?,
+                                       certificates: [Data]?) throws {
         var response: KeynCredentialsResponse!
         switch type {
         case .webauthnCreate:
@@ -227,7 +228,8 @@ public struct BrowserSession: Session {
                                                    counter: counter,
                                                    algorithm: account.webAuthn!.algorithm,
                                                    accountId: account.id,
-                                                   pubKey: account.webAuthnPubKey())
+                                                   pubKey: account.webAuthnPubKey(),
+                                                   certificates: certificates)
         case .webauthnLogin:
             response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature, counter: counter)
         default:

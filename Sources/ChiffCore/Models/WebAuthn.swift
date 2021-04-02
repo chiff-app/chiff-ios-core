@@ -8,7 +8,7 @@
 import Foundation
 import LocalAuthentication
 import CryptoKit
-import CommonCrypto
+import PromiseKit
 
 enum WebAuthnError: Error {
     case wrongRpId
@@ -41,6 +41,21 @@ public struct WebAuthnExtensions: Codable {
     }
 }
 
+public struct WebAuthnAttestation: Codable {
+    let signature: String
+    let counter: Int
+    let clientData: Data
+    let certificates: [Data]?
+
+    internal init(signature: String, counter: Int, clientData: Data, certificates: [Data]?) {
+        self.signature = signature
+        self.counter = counter
+        self.clientData = clientData
+        self.certificates = certificates
+    }
+
+}
+
 /// A WebAuthn for an account.
 public struct WebAuthn: Equatable {
     /// This is the RPid (relying party id) in WebAuthn definition.
@@ -51,7 +66,6 @@ public struct WebAuthn: Equatable {
 
     static let cryptoContext = "webauthn"
     static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
-    static let attestationPrivKey = "MHcCAQEEICs2XglGkEQpfGena9gpYwtBzlRn1iNAWhmrwhcyot-6oAoGCCqGSM49AwEHoUQDQgAEsc1m92yu5MLQyE1x9DSYZqQ6kbeKs__FH2wQBXqjDZC6Jqv2VKcv1kx9Vd5D7X4hswvKy0pw3UdiP2vVgiQJPQ"
 
     /// Create a new WebAuthn object.
     /// - Parameters:
@@ -203,17 +217,27 @@ public struct WebAuthn: Equatable {
     /// - Parameters:
     ///   - accountId: The account id.
     /// - Throws: Keychain, Crypto or WebAuthn errors.
-    /// - Returns: A triple with the signature, used counter and the attestation data.
-    mutating func signAttestation(accountId: String, clientData: String, extensions: WebAuthnExtensions?) throws -> (String, Int, Data) {
-        let authData = try createAuthenticatorData(accountId: accountId, extensions: extensions)
-        let clientDataHash = try Crypto.shared.convertFromBase64(from: clientData)
-        let data = authData + clientDataHash
-        guard #available(iOS 14.0, *) else {
-            throw WebAuthnError.notSupported
+    /// - Returns: A triple with the signature, used counter and the attestation certificate.
+    mutating func signAttestation(accountId: String, clientData: String, extensions: WebAuthnExtensions?) -> Promise<WebAuthnAttestation> {
+        do {
+            let authData = try createAuthenticatorData(accountId: accountId, extensions: extensions)
+            let counter = self.counter
+            let clientDataHash = try Crypto.shared.convertFromBase64(from: clientData)
+            let data = authData + clientDataHash
+            if #available(iOS 14.0, *) { // Anonymization CA
+                let privKey = try SecureEnclave.P256.Signing.PrivateKey()
+                let signature = try privKey.signature(for: data)
+                return firstly {
+                    Attestation.attestWebAuthnKeypair(keypair: privKey)
+                }.map { WebAuthnAttestation(signature: signature.derRepresentation.base64, counter: counter, clientData: clientDataHash, certificates: $0) }
+            } else { // Self-signing
+                let signature = try sign(accountId: accountId, data: clientDataHash)
+                return .value(WebAuthnAttestation(signature: signature, counter: counter, clientData: clientDataHash, certificates: nil))
+            }
+        } catch {
+            return Promise(error: error)
         }
-        let privKey = try P256.Signing.PrivateKey(derRepresentation: WebAuthn.attestationPrivKey.fromBase64!)
-        let signature = try privKey.signature(for: data)
-        return (signature.derRepresentation.base64, counter, data)
+
     }
 
 

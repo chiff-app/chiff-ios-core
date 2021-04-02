@@ -348,20 +348,6 @@ public struct UserAccount: Account, Equatable {
         return try webAuthn.pubKey(accountId: self.id)
     }
 
-    /// Get a signed attestation for WebAuthn
-    /// - Parameters:
-    /// - Throws: Keychain or cryptography errors.
-    /// - Returns: A tuple of the signature and counter.
-    mutating func webAuthnAttestation(clientData: String, extensions: WebAuthnExtensions?) throws -> (String, Int) {
-        guard webAuthn != nil else {
-            throw AccountError.noWebAuthn
-        }
-        let (signature, counter, _) = try webAuthn!.signAttestation(accountId: self.id, clientData: clientData, extensions: extensions)
-        self.lastChange = Date.now
-        try update(secret: nil)
-        return (signature, counter)
-    }
-
     // MARK: - Private functions
 
     private func save(password: String?, keyPair: KeyPair?, offline: Bool = false) throws {

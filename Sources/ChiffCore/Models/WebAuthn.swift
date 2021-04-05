@@ -45,9 +45,9 @@ public struct WebAuthnAttestation: Codable {
     let signature: String
     let counter: Int
     let clientData: Data
-    let certificates: [Data]?
+    let certificates: [String]?
 
-    internal init(signature: String, counter: Int, clientData: Data, certificates: [Data]?) {
+    internal init(signature: String, counter: Int, clientData: Data, certificates: [String]?) {
         self.signature = signature
         self.counter = counter
         self.clientData = clientData
@@ -209,6 +209,7 @@ public struct WebAuthn: Equatable {
             throw WebAuthnError.wrongRpId
         }
         let challengeData = try Crypto.shared.convertFromBase64(from: challenge)
+        counter += 1
         let data = try createAuthenticatorData(accountId: nil, extensions: nil) + challengeData
         return (try sign(accountId: accountId, data: data), counter)
     }
@@ -218,10 +219,9 @@ public struct WebAuthn: Equatable {
     ///   - accountId: The account id.
     /// - Throws: Keychain, Crypto or WebAuthn errors.
     /// - Returns: A triple with the signature, used counter and the attestation certificate.
-    mutating func signAttestation(accountId: String, clientData: String, extensions: WebAuthnExtensions?) -> Promise<WebAuthnAttestation> {
+    func signAttestation(accountId: String, clientData: String, extensions: WebAuthnExtensions?) -> Promise<WebAuthnAttestation> {
         do {
             let authData = try createAuthenticatorData(accountId: accountId, extensions: extensions)
-            let counter = self.counter
             let clientDataHash = try Crypto.shared.convertFromBase64(from: clientData)
             let data = authData + clientDataHash
             if #available(iOS 14.0, *) { // Anonymization CA
@@ -229,10 +229,10 @@ public struct WebAuthn: Equatable {
                 let signature = try privKey.signature(for: data)
                 return firstly {
                     Attestation.attestWebAuthnKeypair(keypair: privKey)
-                }.map { WebAuthnAttestation(signature: signature.derRepresentation.base64, counter: counter, clientData: clientDataHash, certificates: $0) }
+                }.map { WebAuthnAttestation(signature: signature.derRepresentation.base64, counter: self.counter, clientData: clientDataHash, certificates: $0) }
             } else { // Self-signing
                 let signature = try sign(accountId: accountId, data: clientDataHash)
-                return .value(WebAuthnAttestation(signature: signature, counter: counter, clientData: clientDataHash, certificates: nil))
+                return .value(WebAuthnAttestation(signature: signature, counter: self.counter, clientData: clientDataHash, certificates: nil))
             }
         } catch {
             return Promise(error: error)
@@ -243,8 +243,7 @@ public struct WebAuthn: Equatable {
 
     // MARK: - Private functions
 
-    private mutating func createAuthenticatorData(accountId: String?, extensions: WebAuthnExtensions?) throws -> Data {
-        counter += 1
+    private func createAuthenticatorData(accountId: String?, extensions: WebAuthnExtensions?) throws -> Data {
         var data = Data()
         data.append(id.sha256Data)
         data.append(0x05) // UP + UV flags

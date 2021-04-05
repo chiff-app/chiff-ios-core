@@ -138,7 +138,7 @@ struct KeynCredentialsResponse: Codable {
     var accounts: [Int: BulkLoginAccount?]?
     var notes: String?
     var teamId: String?
-    var certificates: [Data]?
+    var certificates: [String]?
 
     enum CodingKeys: String, CodingKey {
         case username = "u"

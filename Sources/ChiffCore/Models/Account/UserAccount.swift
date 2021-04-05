@@ -218,6 +218,15 @@ public struct UserAccount: Account, Equatable {
         try update(secret: nil)
     }
 
+    mutating func addWebAuthn(rpId: String, algorithms: [WebAuthnAlgorithm], context: LAContext?) throws {
+        let webAuthn = try WebAuthn(id: rpId, algorithms: algorithms)
+        let keyPair = try webAuthn.generateKeyPair(accountId: id, context: context)
+        try webAuthn.save(accountId: self.id, keyPair: keyPair)
+        self.webAuthn = webAuthn
+        self.lastChange = Date.now
+        try update(secret: nil)
+    }
+
     /// Remove the `WebAuthn` object from this account, if it exists.
     /// - Throws: Keychain errors
     mutating func removeWebAuthn() throws {

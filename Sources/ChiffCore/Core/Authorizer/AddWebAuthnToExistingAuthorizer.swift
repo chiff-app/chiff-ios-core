@@ -1,5 +1,5 @@
 //
-//  AddSiteAuthorizer.swift
+//  AddWebAuthnToExistingAuthorizer.swift
 //  ChiffCore
 //
 //  Copyright: see LICENSE.md
@@ -8,16 +8,16 @@
 import LocalAuthentication
 import PromiseKit
 
-public class WebAuthnRegistrationAuthorizer: Authorizer {
+public class AddWebAuthnToExistingAuthorizer: Authorizer {
     public var session: BrowserSession
-    public let type = ChiffMessageType.webauthnCreate
+    public let type = ChiffMessageType.addWebauthnToExisting
     public let browserTab: Int
     let siteName: String
     let siteURL: String
     let siteId: String
+    let accountId: String
     let relyingPartyId: String
     let algorithms: [WebAuthnAlgorithm]
-    let username: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
 
@@ -33,7 +33,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
               let siteName = request.siteName,
               let siteURL = request.siteURL,
               let siteId = request.siteID,
-              let username = request.username,
+              let accountId = request.accountID,
               let relyingPartyId = request.relyingPartyId,
               let algorithms = request.algorithms else {
             throw AuthorizationError.missingData
@@ -42,7 +42,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
         self.siteName = siteName
         self.siteURL = siteURL
         self.siteId = siteId
-        self.username = username
+        self.accountId = accountId
         self.relyingPartyId = relyingPartyId
         self.algorithms = algorithms
         self.clientDataHash = request.challenge
@@ -55,15 +55,10 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
         }.then { (context: LAContext) -> Promise<(UserAccount, WebAuthnAttestation?, LAContext)> in
-            let site = Site(name: self.siteName, id: self.siteId, url: self.siteURL, ppd: nil)
-            let account = try UserAccount(username: self.username,
-                                          sites: [site],
-                                          password: nil,
-                                          rpId: self.relyingPartyId,
-                                          algorithms: self.algorithms,
-                                          notes: nil,
-                                          askToChange: false,
-                                          context: context)
+            guard var account = try UserAccount.get(id: self.accountId, context: context) else {
+                throw AccountError.notFound
+            }
+            try account.addWebAuthn(rpId: self.relyingPartyId, algorithms: self.algorithms, context: context)
             if let clientDataHash = self.clientDataHash {
                 return account.webAuthn!.signAttestation(accountId: account.id, clientData: clientDataHash, extensions: self.extensions).map { (account, $0, context) }
             } else { // No attestation

@@ -218,7 +218,7 @@ public struct BrowserSession: Session {
                                        context: LAContext,
                                        signature: String?,
                                        counter: Int?,
-                                       certificates: [Data]?) throws {
+                                       certificates: [String]?) throws {
         var response: KeynCredentialsResponse!
         switch type {
         case .webauthnCreate:

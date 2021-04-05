@@ -33,7 +33,7 @@ public enum WebAuthnAlgorithm: Int, Codable, Equatable {
 
 public struct WebAuthnExtensions: Codable {
     let hmacSecret: Bool?
-    let credentialProtectionPolicy: Int?
+    let credentialProtectionPolicy: UInt8?
 
     enum CodingKeys: String, CodingKey {
         case hmacSecret = "hs"
@@ -262,7 +262,7 @@ public struct WebAuthn: Equatable {
 
     private func appendAttestation(data: inout Data, accountId: String) throws {
         data[32] |= 1 << 6 // Set attestation flag
-        let accountIdData = try Crypto.shared.fromHex(accountId).prefix(16)
+        let accountIdData = try Crypto.shared.fromHex(accountId)
         data.append(WebAuthn.AAGUID)
         data.append(UInt8((accountIdData.count >> 8) & 0xff))
         data.append(UInt8(accountIdData.count & 0xff))
@@ -295,9 +295,10 @@ public struct WebAuthn: Equatable {
     private func appendExtensions(data: inout Data, extensions: WebAuthnExtensions) {
         var count = 0
         var extensionData = Data()
-        if extensions.credentialProtectionPolicy != nil {
+        // Since we should encode CBOR canonical and the key here is 'credProtect' (11 chars) and the next one 'hmac-secret' (12 chars), this one goes first
+        if let policy = extensions.credentialProtectionPolicy {
             count += 1
-            extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, 0x01))
+            extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, policy))
         }
         if let hmac = extensions.hmacSecret, hmac {
             count += 1

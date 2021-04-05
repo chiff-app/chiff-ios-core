@@ -221,8 +221,8 @@ public struct BrowserSession: Session {
                                        certificates: [String]?) throws {
         var response: KeynCredentialsResponse!
         switch type {
-        case .webauthnCreate:
-            response = try KeynCredentialsResponse(type: .webauthnCreate,
+        case .webauthnCreate, .addWebauthnToExisting:
+            response = try KeynCredentialsResponse(type: type,
                                                    browserTab: browserTab,
                                                    signature: signature,
                                                    counter: counter,

@@ -204,4 +204,7 @@ requests:
     value: >-
       You can enable up to 8 accounts to use in your free Chiff plan. Upgrade to
       Chiff Premium to log in with all your accounts again
+webauthn:
+  attestation:
+    value: Verifying device integrity
 

@@ -219,6 +219,9 @@ public struct UserAccount: Account, Equatable {
     }
 
     mutating func addWebAuthn(rpId: String, algorithms: [WebAuthnAlgorithm], context: LAContext?) throws {
+        guard self.webAuthn == nil else {
+            throw AccountError.webAuthnExists
+        }
         let webAuthn = try WebAuthn(id: rpId, algorithms: algorithms)
         let keyPair = try webAuthn.generateKeyPair(accountId: id, context: context)
         try webAuthn.save(accountId: self.id, keyPair: keyPair)

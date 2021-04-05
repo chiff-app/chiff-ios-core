@@ -15,17 +15,18 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
     let siteName: String
     let siteURL: String
     let siteId: String
-    let accountId: String
     let relyingPartyId: String
     let algorithms: [WebAuthnAlgorithm]
+    let accountId: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
 
-    public let requestText = "requests.add_account".localized.capitalizedFirstLetter
-    public let successText = "requests.account_added".localized.capitalizedFirstLetter
+    public let requestText = "requests.update_account".localized.capitalizedFirstLetter
+    public let successText = "requests.account_updated".localized.capitalizedFirstLetter
     public var authenticationReason: String {
-        return  String(format: "requests.add_site".localized, siteName)
+        return  String(format: "requests.update_this".localized, siteName)
     }
+
 
     public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
@@ -38,11 +39,11 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
               let algorithms = request.algorithms else {
             throw AuthorizationError.missingData
         }
+        self.accountId = accountId
         self.browserTab = browserTab
         self.siteName = siteName
         self.siteURL = siteURL
         self.siteId = siteId
-        self.accountId = accountId
         self.relyingPartyId = relyingPartyId
         self.algorithms = algorithms
         self.clientDataHash = request.challenge
@@ -60,6 +61,7 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
             }
             try account.addWebAuthn(rpId: self.relyingPartyId, algorithms: self.algorithms, context: context)
             if let clientDataHash = self.clientDataHash {
+                startLoading?("webauthn.attestation".localized)
                 return account.webAuthn!.signAttestation(accountId: account.id, clientData: clientDataHash, extensions: self.extensions).map { (account, $0, context) }
             } else { // No attestation
                 return .value((account, nil, context))

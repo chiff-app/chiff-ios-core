@@ -206,4 +206,7 @@ requests:
     value: >-
       Je kunt maar 8 accounts inschakelen in de gratis versie van Chiff. Upgrade
       naar Chiff Premium om weer met al je accounts in te loggen
+webauthn:
+  attestation:
+    value: Apparaatintegriteit controleren
 

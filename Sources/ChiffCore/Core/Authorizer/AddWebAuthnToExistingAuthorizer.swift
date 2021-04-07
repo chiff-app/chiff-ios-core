@@ -67,7 +67,7 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
                 return .value((account, nil, context))
             }
         }.map { (account, attestation, context) in
-            try self.session.sendWebAuthnResponse(account: account, browserTab: self.browserTab, type: self.type, context: context, signature: attestation?.signature, counter: attestation?.counter, certificates: attestation?.certificates)
+            try self.session.sendWebAuthnResponse(account: account, browserTab: self.browserTab, type: self.type, context: context, signature: attestation?.signature, certificates: attestation?.certificates)
             NotificationCenter.default.postMain(name: .accountsLoaded, object: nil)
             success = true
             return nil

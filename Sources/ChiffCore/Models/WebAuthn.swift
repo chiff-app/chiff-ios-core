@@ -32,24 +32,20 @@ public enum WebAuthnAlgorithm: Int, Codable, Equatable {
 }
 
 public struct WebAuthnExtensions: Codable {
-    let hmacSecret: Bool?
     let credentialProtectionPolicy: UInt8?
 
     enum CodingKeys: String, CodingKey {
-        case hmacSecret = "hs"
         case credentialProtectionPolicy = "cp"
     }
 }
 
 public struct WebAuthnAttestation: Codable {
     let signature: String
-    let counter: Int
     let clientData: Data
     let certificates: [String]?
 
-    internal init(signature: String, counter: Int, clientData: Data, certificates: [String]?) {
+    internal init(signature: String, clientData: Data, certificates: [String]?) {
         self.signature = signature
-        self.counter = counter
         self.clientData = clientData
         self.certificates = certificates
     }
@@ -62,7 +58,6 @@ public struct WebAuthn: Equatable {
     let id: String
     let algorithm: WebAuthnAlgorithm
     let salt: Data
-    var counter: Int = 0
 
     static let cryptoContext = "webauthn"
     static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
@@ -203,15 +198,14 @@ public struct WebAuthn: Equatable {
     ///   - challenge: The challenge to be signed.
     ///   - rpId: The relying party id.
     /// - Throws: Keychain, Crypto or WebAuthn errors.
-    /// - Returns: A tuple with the signature and the used counter.
-    mutating func sign(accountId: String, challenge: String, rpId: String) throws -> (String, Int) {
+    /// - Returns: The signature
+    func sign(accountId: String, challenge: String, rpId: String, extensions: WebAuthnExtensions?) throws -> String {
         guard rpId == id else {
             throw WebAuthnError.wrongRpId
         }
         let challengeData = try Crypto.shared.convertFromBase64(from: challenge)
-        counter += 1
         let data = try createAuthenticatorData(accountId: nil, extensions: nil) + challengeData
-        return (try sign(accountId: accountId, data: data), counter)
+        return try sign(accountId: accountId, data: data)
     }
 
     /// Get a WebAuthn attestation
@@ -229,10 +223,10 @@ public struct WebAuthn: Equatable {
                 let signature = try privKey.signature(for: data)
                 return firstly {
                     Attestation.attestWebAuthnKeypair(keypair: privKey)
-                }.map { WebAuthnAttestation(signature: signature.derRepresentation.base64, counter: self.counter, clientData: clientDataHash, certificates: $0) }
+                }.map { WebAuthnAttestation(signature: signature.derRepresentation.base64, clientData: clientDataHash, certificates: $0) }
             } else { // Self-signing
                 let signature = try sign(accountId: accountId, data: clientDataHash)
-                return .value(WebAuthnAttestation(signature: signature, counter: self.counter, clientData: clientDataHash, certificates: nil))
+                return .value(WebAuthnAttestation(signature: signature, clientData: clientDataHash, certificates: nil))
             }
         } catch {
             return Promise(error: error)
@@ -246,11 +240,7 @@ public struct WebAuthn: Equatable {
     private func createAuthenticatorData(accountId: String?, extensions: WebAuthnExtensions?) throws -> Data {
         var data = Data()
         data.append(id.sha256Data)
-        data.append(0x05) // UP + UV flags
-        data.append(UInt8((counter >> 24) & 0xff))
-        data.append(UInt8((counter >> 16) & 0xff))
-        data.append(UInt8((counter >> 8) & 0xff))
-        data.append(UInt8((counter >> 0) & 0xff))
+        data.append(contentsOf: [0x05, 0x00, 0x00, 0x00, 0x00]) // UP + UV flags and we're not using the counter.
         if let accountId = accountId {
             try appendAttestation(data: &data, accountId: accountId)
         }
@@ -299,10 +289,6 @@ public struct WebAuthn: Equatable {
         if let policy = extensions.credentialProtectionPolicy {
             count += 1
             extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, policy))
-        }
-        if let hmac = extensions.hmacSecret, hmac {
-            count += 1
-            extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x68, 0x6D, 0x61, 0x63, 0x2D, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0xf5))
         }
         if !extensionData.isEmpty {
             data[32] |= 1 << 7 // Set extension flag
@@ -357,7 +343,6 @@ extension WebAuthn: Codable {
         case id
         case algorithm
         case salt
-        case counter
     }
 
     public init(from decoder: Decoder) throws {
@@ -370,6 +355,5 @@ extension WebAuthn: Codable {
             var integer = try values.decode(UInt64.self, forKey: .salt)
             self.salt = withUnsafeBytes(of: &integer) { Data($0) }
         }
-        self.counter = try values.decode(Int.self, forKey: .counter)
     }
 }

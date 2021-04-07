@@ -127,7 +127,6 @@ struct KeynCredentialsResponse: Codable {
     var username: String?
     var password: String?
     var signature: String?
-    var counter: Int?
     var algorithm: WebAuthnAlgorithm?
     /// For password change only. When registering `password` should be set.
     var newPassword: String?
@@ -144,7 +143,6 @@ struct KeynCredentialsResponse: Codable {
         case username = "u"
         case password = "p"
         case signature = "s"
-        case counter = "n"
         case algorithm = "g"
         case newPassword = "np"
         case browserTab = "b"

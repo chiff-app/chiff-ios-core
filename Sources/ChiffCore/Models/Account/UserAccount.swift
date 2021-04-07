@@ -339,15 +339,12 @@ public struct UserAccount: Account, Equatable {
     ///   - challenge: The challenge that should be signed.
     ///   - rpId: The relying party id.
     /// - Throws: Keychain or cryptography errors.
-    /// - Returns: A tuple of the signature and counter.
-    mutating func webAuthnSign(challenge: String, rpId: String) throws -> (String, Int) {
+    /// - Returns: The signature
+    func webAuthnSign(challenge: String, rpId: String) throws -> String {
         guard webAuthn != nil else {
             throw AccountError.noWebAuthn
         }
-        let (signature, counter) = try webAuthn!.sign(accountId: self.id, challenge: challenge, rpId: rpId)
-        self.lastChange = Date.now
-        try update(secret: nil)
-        return (signature, counter)
+        return try webAuthn!.sign(accountId: self.id, challenge: challenge, rpId: rpId, extensions: nil)
     }
 
     /// Return the WebAuthn public key.

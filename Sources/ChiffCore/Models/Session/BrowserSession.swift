@@ -217,7 +217,6 @@ public struct BrowserSession: Session {
                                        type: ChiffMessageType,
                                        context: LAContext,
                                        signature: String?,
-                                       counter: Int?,
                                        certificates: [String]?) throws {
         var response: KeynCredentialsResponse!
         switch type {
@@ -225,13 +224,12 @@ public struct BrowserSession: Session {
             response = try KeynCredentialsResponse(type: type,
                                                    browserTab: browserTab,
                                                    signature: signature,
-                                                   counter: counter,
                                                    algorithm: account.webAuthn!.algorithm,
                                                    accountId: account.id,
                                                    pubKey: account.webAuthnPubKey(),
                                                    certificates: certificates)
         case .webauthnLogin:
-            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature, counter: counter)
+            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature)
         default:
             throw SessionError.unknownType
         }

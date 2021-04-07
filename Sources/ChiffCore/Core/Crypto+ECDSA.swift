@@ -7,6 +7,7 @@
 
 import Foundation
 import CryptoKit
+import LocalAuthentication
 
 @available(iOS 13.0, *)
 public extension Crypto {
@@ -34,5 +35,19 @@ public extension Crypto {
             throw CryptoError.wrongSigningFunction
         }
     }
+
+    /// Create a ECDSA signing keypair. This is used for WebAuthn.
+    /// - Parameter seed: The `LocalAuthenticationContext`. Will try to use main context if not provided
+    /// - Returns: The keypair.
+    func createSecureEnclaveECDSASigningKeyPair(context: LAContext?) throws -> SecureEnclave.P256.Signing.PrivateKey {
+        let access = SecAccessControlCreateWithFlags(kCFAllocatorDefault, // Use the default allocator.
+                                                     kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                                                     .privateKeyUsage,
+                                                     nil)! // Ignore any error.
+        return try SecureEnclave.P256.Signing.PrivateKey(compactRepresentable: true,
+                                                                accessControl: access,
+                                                                authenticationContext: context ?? LocalAuthenticationManager.shared.mainContext)
+    }
+
 
 }

@@ -128,6 +128,8 @@ public enum ChiffMessageType: Int, Codable {
     case getDetails = 19
     case updateAccount = 20
     case createOrganisation = 21
+    case addWebauthnToExisting = 22
+    case authorizeCredentialIdDisclosure = 23
 }
 
 public enum AnalyticsEventProperty: String {

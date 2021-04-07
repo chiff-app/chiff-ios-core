@@ -360,7 +360,7 @@ class CryptoTests: XCTestCase {
         XCTAssertTrue(Crypto.shared.equals(first: try Crypto.shared.convertFromBase64(from: base64String), second: try Crypto.shared.fromHex(hexString)))
     }
 
-    @available(iOS 13.0, *)
+    @available(iOS 14.0, *)
     func testECDSA256KeyPair() {
         do {
             guard let seed = "9UOiqnsOWeOi2BQxp3upjjWEBbs-s015PCaWthwxSQM".fromBase64 else {
@@ -368,6 +368,10 @@ class CryptoTests: XCTestCase {
             }
             let keypair = try Crypto.shared.createECDSASigningKeyPair(seed: seed, algorithm: .ECDSA256)
             XCTAssertEqual("5ilW_l14-8ItmcAbNE3jVQCtBPFcVSq3Vi8T4-97C2gk2CGID_KJ_wRryGFL-NvoAYL4opY0pVy8kowZXwKUuA", keypair.pubKey.base64)
+            let privKey = try P256.Signing.PrivateKey(rawRepresentation: keypair.privKey)
+            let sig = try privKey.signature(for: "test".data(using: .utf8)!)
+            print(privKey.publicKey.derRepresentation.hexEncodedString())
+            print(sig.derRepresentation.hexEncodedString())
         } catch {
             XCTFail("Error creating keypair: \(error)")
         }

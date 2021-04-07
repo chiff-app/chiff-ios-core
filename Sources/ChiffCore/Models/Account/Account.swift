@@ -21,6 +21,7 @@ public enum AccountError: Error {
     case tokenRetrieval
     case wrongRpId
     case noWebAuthn
+    case webAuthnExists
     case notTOTP
     case importError(failed: Int, total: Int)
 }

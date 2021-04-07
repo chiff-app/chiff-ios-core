@@ -12,6 +12,7 @@ import PromiseKit
 import Kronos
 import Sodium
 import DataCompression
+import DeviceCheck
 
 public extension OSStatus {
     /// A human readable message for the OS status.
@@ -310,6 +311,23 @@ extension TimeInterval {
 
     /// The number of seconds in a day.
     static let oneDay: TimeInterval = 3600 * 24
+
+}
+
+@available(iOS 14.0, *)
+extension DCAppAttestService {
+
+    func generateKey() -> Promise<String> {
+        return Promise { self.generateKey(completionHandler: $0.resolve) }
+    }
+
+    func attestKey(_ id: String, clientDataHash: Data) -> Promise<Data> {
+        return Promise { self.attestKey(id, clientDataHash: clientDataHash, completionHandler: $0.resolve) }
+    }
+
+    func generateAssertion(_ id: String, clientDataHash: Data) -> Promise<Data> {
+        return Promise { self.generateAssertion(id, clientDataHash: clientDataHash, completionHandler: $0.resolve) }
+    }
 
 }
 

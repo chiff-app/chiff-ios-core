@@ -217,19 +217,19 @@ public struct BrowserSession: Session {
                                        type: ChiffMessageType,
                                        context: LAContext,
                                        signature: String?,
-                                       counter: Int?) throws {
+                                       certificates: [String]?) throws {
         var response: KeynCredentialsResponse!
         switch type {
-        case .webauthnCreate:
-            response = try KeynCredentialsResponse(type: .webauthnCreate,
+        case .webauthnCreate, .addWebauthnToExisting:
+            response = try KeynCredentialsResponse(type: type,
                                                    browserTab: browserTab,
                                                    signature: signature,
-                                                   counter: counter,
                                                    algorithm: account.webAuthn!.algorithm,
                                                    accountId: account.id,
-                                                   pubKey: account.webAuthnPubKey())
+                                                   pubKey: account.webAuthnPubKey(),
+                                                   certificates: certificates)
         case .webauthnLogin:
-            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature, counter: counter)
+            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature)
         default:
             throw SessionError.unknownType
         }

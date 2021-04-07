@@ -218,6 +218,18 @@ public struct UserAccount: Account, Equatable {
         try update(secret: nil)
     }
 
+    mutating func addWebAuthn(rpId: String, algorithms: [WebAuthnAlgorithm], context: LAContext?) throws {
+        guard self.webAuthn == nil else {
+            throw AccountError.webAuthnExists
+        }
+        let webAuthn = try WebAuthn(id: rpId, algorithms: algorithms)
+        let keyPair = try webAuthn.generateKeyPair(accountId: id, context: context)
+        try webAuthn.save(accountId: self.id, keyPair: keyPair)
+        self.webAuthn = webAuthn
+        self.lastChange = Date.now
+        try update(secret: nil)
+    }
+
     /// Remove the `WebAuthn` object from this account, if it exists.
     /// - Throws: Keychain errors
     mutating func removeWebAuthn() throws {
@@ -327,15 +339,12 @@ public struct UserAccount: Account, Equatable {
     ///   - challenge: The challenge that should be signed.
     ///   - rpId: The relying party id.
     /// - Throws: Keychain or cryptography errors.
-    /// - Returns: A tuple of the signature and counter.
-    mutating func webAuthnSign(challenge: String, rpId: String) throws -> (String, Int) {
+    /// - Returns: The signature
+    func webAuthnSign(challenge: String, rpId: String) throws -> String {
         guard webAuthn != nil else {
             throw AccountError.noWebAuthn
         }
-        let (signature, counter) = try webAuthn!.sign(accountId: self.id, challenge: challenge, rpId: rpId)
-        self.lastChange = Date.now
-        try update(secret: nil)
-        return (signature, counter)
+        return try webAuthn!.sign(accountId: self.id, challenge: challenge, rpId: rpId, extensions: nil)
     }
 
     /// Return the WebAuthn public key.
@@ -346,20 +355,6 @@ public struct UserAccount: Account, Equatable {
             throw AccountError.noWebAuthn
         }
         return try webAuthn.pubKey(accountId: self.id)
-    }
-
-    /// Get a signed attestation for WebAuthn
-    /// - Parameters:
-    /// - Throws: Keychain or cryptography errors.
-    /// - Returns: A tuple of the signature and counter.
-    mutating func webAuthnAttestation(clientData: String, extensions: WebAuthnExtensions?) throws -> (String, Int) {
-        guard webAuthn != nil else {
-            throw AccountError.noWebAuthn
-        }
-        let (signature, counter, _) = try webAuthn!.signAttestation(accountId: self.id, clientData: clientData, extensions: extensions)
-        self.lastChange = Date.now
-        try update(secret: nil)
-        return (signature, counter)
     }
 
     // MARK: - Private functions

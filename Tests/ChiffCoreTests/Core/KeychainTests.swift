@@ -158,7 +158,9 @@ class KeychainTests: XCTestCase {
         context.invalidate()
         Keychain.shared.get(id: KeyIdentifier.master.identifier(for: .seed), service: .seed, reason: "Retrieve password", with: context, authenticationType: .ifNeeded).done { _ in
             XCTFail("Should throw")
-        }.ensure {
+        }.catch { error in
+            print("Expected error: \(error.localizedDescription)")
+        }.finally {
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 3.0)

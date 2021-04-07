@@ -184,7 +184,7 @@ public struct TeamSession: Session {
     /// - Parameter backup: If this is true (default), backup will be deleted as well.
     /// - Throws: Keychain errors.
     func delete(backup: Bool = true) throws {
-        fatalError("TODO: Delete shared accounts outside this function")
+        SharedAccount.deleteAll(for: self.id)
         try Keychain.shared.delete(id: SessionIdentifier.sharedKey.identifier(for: id), service: Self.encryptionService)
         try Keychain.shared.delete(id: SessionIdentifier.sharedSeed.identifier(for: id), service: Self.signingService)
         try Keychain.shared.delete(id: SessionIdentifier.signingKeyPair.identifier(for: id), service: Self.signingService)

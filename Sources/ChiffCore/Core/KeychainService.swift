@@ -17,6 +17,7 @@ public enum KeychainService {
     case teamSession(attribute: SessionAttribute)
     case aws
     case backup
+    case attestation
 
     public enum AccountAttribute: String {
         case otp
@@ -60,6 +61,8 @@ public enum KeychainService {
             return "io.keyn.aws"
         case .backup:
             return "io.keyn.backup"
+        case .attestation:
+            return "io.keyn.attestation"
         }
     }
 
@@ -76,7 +79,7 @@ public enum KeychainService {
             }
         case .aws, .backup:
             return .secret
-        case .seed:
+        case .seed, .attestation:
             return .topsecret
         }
     }

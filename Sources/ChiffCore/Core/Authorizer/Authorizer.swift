@@ -39,10 +39,16 @@ public extension Authorizer {
 
     /// Notifies the session client that this request is rejected.
     func rejectRequest() -> Guarantee<Void> {
+        return cancelRequest(reason: .reject, error: nil)
+    }
+
+    /// Cancel a request.
+    /// - Parameters:
+    ///   - reason: The message type, should be either reject error
+    ///   - error: Optionally, an error response.
+    func cancelRequest(reason: ChiffMessageType, error: ChiffErrorResponse?) -> Guarantee<Void> {
         return firstly {
-            session.cancelRequest(reason: .reject, browserTab: browserTab)
-        }.ensure {
-            AuthorizationGuard.shared.authorizationInProgress = false
+            session.cancelRequest(reason: reason, browserTab: browserTab, error: error)
         }.recover { error in
             Logger.shared.error("Reject message could not be sent.", error: error)
             return

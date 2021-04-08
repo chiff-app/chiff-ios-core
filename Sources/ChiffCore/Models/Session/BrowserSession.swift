@@ -104,9 +104,9 @@ public struct BrowserSession: Session {
     /// - Parameters:
     ///   - reason: The cancellation reason.
     ///   - browserTab: The browserTab in the client.
-    func cancelRequest(reason: ChiffMessageType, browserTab: Int) -> Promise<Void> {
+    public func cancelRequest(reason: ChiffMessageType, browserTab: Int, error: ChiffErrorResponse?) -> Promise<Void> {
         do {
-            let response = KeynCredentialsResponse(type: reason, browserTab: browserTab)
+            let response = KeynCredentialsResponse(type: reason, browserTab: browserTab, error: error)
             let jsonMessage = try JSONEncoder().encode(response)
             let ciphertext = try Crypto.shared.encrypt(jsonMessage, key: sharedKey())
             return try sendToVolatileQueue(ciphertext: ciphertext).asVoid()

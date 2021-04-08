@@ -138,6 +138,7 @@ struct KeynCredentialsResponse: Codable {
     var notes: String?
     var teamId: String?
     var certificates: [String]?
+    var error: ChiffErrorResponse?
 
     enum CodingKeys: String, CodingKey {
         case username = "u"
@@ -154,6 +155,7 @@ struct KeynCredentialsResponse: Codable {
         case notes = "y"
         case teamId = "i"
         case certificates = "c"
+        case error = "e"
     }
 
 }

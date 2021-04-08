@@ -20,6 +20,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
     let username: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
+    let accountExists: Bool
 
     public let requestText = "requests.add_account".localized.capitalizedFirstLetter
     public let successText = "requests.account_added".localized.capitalizedFirstLetter
@@ -38,6 +39,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
               let algorithms = request.algorithms else {
             throw AuthorizationError.missingData
         }
+        self.accountExists = request.accountID != nil
         self.browserTab = browserTab
         self.siteName = siteName
         self.siteURL = siteURL
@@ -52,6 +54,9 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
 
     public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
+        guard !accountExists else {
+            return Promise(error: ChiffErrorResponse.accountExists)
+        }
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
         }.then { (context: LAContext) -> Promise<(UserAccount, WebAuthnAttestation?, LAContext)> in

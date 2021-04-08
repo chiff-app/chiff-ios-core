@@ -117,7 +117,7 @@ public enum ChiffMessageType: Int, Codable {
     case confirm = 8
     case fill = 9
     case reject = 10
-    case expired = 11
+    case error = 11
     case preferences = 12
     case addToExisting = 13
     case disabled = 14
@@ -129,7 +129,12 @@ public enum ChiffMessageType: Int, Codable {
     case updateAccount = 20
     case createOrganisation = 21
     case addWebauthnToExisting = 22
-    case authorizeCredentialIdDisclosure = 23
+}
+
+public enum ChiffErrorResponse: String, Error, Codable {
+    case accountExists
+    case expired
+    case discloseAccountExists
 }
 
 public enum AnalyticsEventProperty: String {

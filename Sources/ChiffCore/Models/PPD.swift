@@ -170,7 +170,7 @@ public struct PPDProperties: Codable {
     /// Maximum length of the password. A value of 0 means no maximum length.
     let maxLength: Int?
     /// Password expiry in days. A value of 0 means no expiry.
-    var expires: Int = 0
+    @DecodableDefault.Zero var expires: Int = 0
 }
 
 public struct PPDCharacterSettings: Codable {
@@ -207,7 +207,7 @@ public struct PPDPositionRestriction: Codable {
      */
     let positions: String
     /// Minimum occurrences of the character set for the given positions. A value of 0 means no restrictions of minimum occurrences.
-    let minOccurs: Int
+    @DecodableDefault.Zero var minOccurs: Int
     let maxOccurs: Int?
     let characterSet: String
 
@@ -221,7 +221,7 @@ public struct PPDPositionRestriction: Codable {
 
 public struct PPDRequirementGroup: Codable {
     /// Minimum number of rules that must be fulfilled.
-    let minRules: Int
+    @DecodableDefault.One var minRules: Int
     /// A list of requirement rules.
     let requirementRules: [PPDRequirementRule]
 
@@ -235,7 +235,7 @@ public struct PPDRequirementRule: Codable {
     /// List of character positions this rule applies to as defined in the PositionRestriction type.
     let positions: String?
     /// Minimum occurrences of the given character set. A value of 0 means no minimum occurrences.
-    let minOccurs: Int
+    @DecodableDefault.Zero var minOccurs: Int
     /// Maximum occurrences of the given character set. Ommitted for no maximum occurrences.
     let maxOccurs: Int?
     /// A reference to the character set this rule applies to.

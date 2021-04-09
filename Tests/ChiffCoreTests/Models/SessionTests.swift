@@ -156,7 +156,7 @@ class SessionTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Finish testCancelRequest")
         let (_, _, pubKey) = TestHelper.createSharedKey()
         let session = BrowserSession(id: TestHelper.browserPublicKeyBase64.hash!, signingPubKey: pubKey, browser: .chrome, title: "Chrome @ test", version: 0)
-        session.cancelRequest(reason: .disabled, browserTab: 0).catch { error in
+        session.cancelRequest(reason: .disabled, browserTab: 0, error: nil).catch { error in
             XCTFail(error.localizedDescription)
         }.finally {
             expectation.fulfill()
@@ -169,7 +169,7 @@ class SessionTests: XCTestCase {
         let (_, _, pubKey) = TestHelper.createSharedKey()
         TestHelper.deleteLocalData()
         let session = BrowserSession(id: TestHelper.browserPublicKeyBase64.hash!, signingPubKey: pubKey, browser: .chrome, title: "Chrome @ test", version: 0)
-        _ = session.cancelRequest(reason: .disabled, browserTab: 0).done { _ in
+        _ = session.cancelRequest(reason: .disabled, browserTab: 0, error: nil).done { _ in
             XCTFail("Should fail")
         }.ensure {
             expectation.fulfill()

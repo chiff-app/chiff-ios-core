@@ -57,7 +57,7 @@ public struct Attestation {
                 "attestationObject": attestation.base64
             ]
             let jsonData = try JSONSerialization.data(withJSONObject: data, options: [])
-            return try API.shared.signedRequest(path: "users/\(Seed.publicKey())/devices/\(deviceId)/attestation", method: .post, privKey: Seed.privateKey(), message: ["hash": jsonData.sha256.hexEncodedString(), "id": deviceId], body: jsonData).map { id }
+            return try API.shared.signedRequest(path: "users/\(Seed.publicKey())/devices/\(deviceId)/attestation", method: .post, privKey: Seed.privateKey(), message: ["hash": jsonData.sha256.hexEncodedString(), "id": deviceId], body: jsonData).asVoid().map { id }
         }.done { id in
             Properties.attestationKeyID = id
         }.log("Error submitting attestation key")

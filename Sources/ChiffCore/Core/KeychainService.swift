@@ -13,11 +13,11 @@ public enum KeychainService {
     case account(attribute: AccountAttribute? = nil)
     case sharedAccount(attribute: AccountAttribute? = nil)
     case seed
+    case passwordSeed
     case browserSession(attribute: SessionAttribute)
     case teamSession(attribute: SessionAttribute)
     case aws
     case backup
-    case attestation
 
     public enum AccountAttribute: String {
         case otp
@@ -31,10 +31,9 @@ public enum KeychainService {
     }
 
     enum Classification {
-        case restricted
-        case confidential
-        case secret
-        case topsecret
+        case confidential   // kSecAttrAccessibleAfterFirstUnlock
+        case secret         // kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        case topsecret      // user presence required
     }
 
     public var service: String {
@@ -55,49 +54,40 @@ public enum KeychainService {
             return "io.keyn.session.\(attribute.rawValue)"
         case .teamSession(let attribute):
             return "io.keyn.teamsession.\(attribute.rawValue)"
-        case .seed:
+        case .seed, .passwordSeed:
             return "io.keyn.seed"
         case .aws:
             return "io.keyn.aws"
         case .backup:
             return "io.keyn.backup"
-        case .attestation:
-            return "io.keyn.attestation"
         }
     }
 
     var classification: Classification {
         switch self {
         case .browserSession, .teamSession:
-            return .restricted
-        case .account(let attribute), .sharedAccount(let attribute):
-            switch attribute {
-            case .otp, .notes:
-                return .topsecret
-            default:
-                return .confidential
-            }
+            return .confidential
         case .aws, .backup:
             return .secret
-        case .seed, .attestation:
+        default:
             return .topsecret
         }
     }
 
     /// The `accessGroup` is used to determine whether item are accessible from the extensions.
     public var accessGroup: String {
-        switch self.classification {
-        case .restricted:
-            return "35MFYY2JY5.io.keyn.restricted"
-        case .confidential:
-            return "35MFYY2JY5.io.keyn.confidential"
-        case .secret, .topsecret:
-            return "35MFYY2JY5.io.keyn.keyn"
+        switch self {
+        case .browserSession, .teamSession:
+            return "35MFYY2JY5.io.keyn.restricted"      // Shared with notificationExtension and credentialProvider
+        case .account, .sharedAccount, .backup, .passwordSeed:
+            return "35MFYY2JY5.io.keyn.confidential"    // Shared with credentialProvider
+        case .aws, .seed:
+            return "35MFYY2JY5.io.keyn.keyn"            // Chiff only
         }
     }
 
     var defaultContext: LAContext? {
-        return (self.classification == .confidential || self.classification == .topsecret) ? LocalAuthenticationManager.shared.mainContext : nil
+        return (self.classification == .secret || self.classification == .topsecret) ? LocalAuthenticationManager.shared.mainContext : nil
     }
 
 }

@@ -53,7 +53,7 @@ public struct PPD: Codable {
     ///   - id: The site ID.
     ///   - organisationKeyPair: Optionnally, an organisation keypair if organisational PPDs should be checked as well.
     /// - Returns: A PPD, if it exists.
-    static func get(id: String, organisationKeyPair: KeyPair?) -> Guarantee<PPD?> {
+    public static func get(id: String, organisationKeyPair: KeyPair?) -> Guarantee<PPD?> {
         let parameters = ["v": PPDVersion.v1_1.rawValue]
         return firstly { () -> Promise<JSONObject> in
             if let keyPair = organisationKeyPair {

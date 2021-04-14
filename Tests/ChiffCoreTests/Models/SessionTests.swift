@@ -435,11 +435,11 @@ class SessionTests: XCTestCase {
             query[kSecAttrGeneric as String] = objectData
 
             switch service.classification {
-            case .restricted:
+            case .confidential:
                 query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
             case .secret:
                 query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-            case .confidential, .topsecret:
+            case .topsecret:
                 let access = SecAccessControlCreateWithFlags(nil, // Use the default allocator.
                     kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
                     .userPresence,

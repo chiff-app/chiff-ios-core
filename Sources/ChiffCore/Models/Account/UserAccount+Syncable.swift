@@ -351,7 +351,14 @@ public struct BackupUserAccount: BaseAccount, BackupObject {
         self.askToLogin = try values.decodeIfPresent(Bool.self, forKey: .askToLogin)
         self.askToChange = try values.decodeIfPresent(Bool.self, forKey: .askToChange)
         self.enabled = false
-        self.tokenURL = try values.decodeIfPresent(URL.self, forKey: .tokenURL)
+        do {
+            self.tokenURL = try values.decodeIfPresent(URL.self, forKey: .tokenURL)
+        } catch is DecodingError {
+            // Android version <= 1.7.0 did not correctly URL-encode
+            if let urlString = try values.decodeIfPresent(String.self, forKey: .tokenURL), urlString.contains(" ") {
+                self.tokenURL = URL(string: urlString.replacingOccurrences(of: " ", with: "%20"))
+            }
+        }
         self.tokenSecret = try values.decodeIfPresent(Data.self, forKey: .tokenSecret)
         self.version = try values.decodeIfPresent(Int.self, forKey: .version) ?? 0
         self.webAuthn = try values.decodeIfPresent(WebAuthn.self, forKey: .webAuthn)

@@ -22,6 +22,15 @@ extension Keychain {
                 try migrateService(oldService: "io.keyn.notes", attribute: .notes, includeSharedAccount: true, context: context)
                 try migrateService(oldService: "io.keyn.webauthn", attribute: .webauthn, includeSharedAccount: false, context: context)
                 Properties.currentKeychainVersion = 1
+                fallthrough
+            case let n where n < 2:
+                try migrateKeychainGroup(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, context: context)
+                try migrateKeychainGroup(id: nil, service: .backup, context: context)
+                try migrateKeychainGroup(id: nil, service: .account(attribute: .notes), context: context)
+                try migrateKeychainGroup(id: nil, service: .account(attribute: .otp), context: context)
+                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: .notes), context: context)
+                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: .otp), context: context)
+                Properties.currentKeychainVersion = 2
             default:
                 return
             }
@@ -31,6 +40,30 @@ extension Keychain {
     }
 
     // MARK: - Private functions
+
+    private func migrateKeychainGroup(id identifier: String?, service: KeychainService, context: LAContext?) throws {
+        var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                    kSecAttrService as String: service.service,
+                                    kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail]
+
+        if let identifier = identifier {
+            query[kSecAttrAccount as String] = identifier
+        }
+
+        if let defaultContext = service.defaultContext {
+            query[kSecUseAuthenticationContext as String] = context ?? defaultContext
+        }
+
+        let attributes: [String: Any] = [kSecAttrAccessGroup as String: service.accessGroup]
+
+        switch SecItemUpdate(query as CFDictionary, attributes as CFDictionary) {
+        case errSecSuccess, errSecItemNotFound: return
+        case -26276, errSecInteractionNotAllowed:
+            throw KeychainError.interactionNotAllowed
+        case let status:
+            throw KeychainError.unhandledError(status.message)
+        }
+    }
 
     private func migrateService(oldService: String, attribute: KeychainService.AccountAttribute, includeSharedAccount: Bool, context: LAContext?) throws {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,

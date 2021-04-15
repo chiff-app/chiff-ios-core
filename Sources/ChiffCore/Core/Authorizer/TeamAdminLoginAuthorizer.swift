@@ -16,7 +16,7 @@ public class TeamAdminLoginAuthorizer: Authorizer {
     public let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
     public let successText = "requests.login_succesful".localized.capitalizedFirstLetter
     public var authenticationReason: String {
-        return String(format: "requests.login_to".localized, "requests.keyn_for_teams".localized)
+        return String(format: "requests.login_to".localized, "requests.chiff_for_teams".localized)
     }
 
     public required init(request: ChiffRequest, session: BrowserSession) throws {

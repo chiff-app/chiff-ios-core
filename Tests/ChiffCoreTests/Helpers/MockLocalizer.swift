@@ -8,7 +8,7 @@
 #if canImport(UIKit)
 import UIKit
 #else
-import Cococa
+import Cocoa
 #endif
 @testable import ChiffCore
 

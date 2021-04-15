@@ -39,8 +39,9 @@ public struct Properties {
     private static let lastRunVersionFlag = "lastRunVersionFlag"
     private static let migratedFlag = "migratedFlag"
     private static let keychainVersionFlag = "keychainVersionFlag"
+    private static let attestationKeyIDFlag = "attestationKeyIDFlag"
 
-    public static let latestKeychainVersion = 1
+    public static let latestKeychainVersion = 2
     static let termsOfUseVersion = 2
 
     /// Whether this is the first time the app is launched.
@@ -160,6 +161,12 @@ public struct Properties {
         } else {
             UserDefaults.standard.set([teamId: count], forKey: teamAccountCountFlag)
         }
+    }
+
+    /// The WebAuthn (Apple) attestation keyID.
+    static var attestationKeyID: String? {
+        get { return UserDefaults.standard.string(forKey: attestationKeyIDFlag) }
+        set { UserDefaults.standard.set(newValue, forKey: attestationKeyIDFlag) }
     }
 
     /// Remove relevant user preferences.

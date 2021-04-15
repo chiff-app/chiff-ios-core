@@ -127,7 +127,6 @@ struct KeynCredentialsResponse: Codable {
     var username: String?
     var password: String?
     var signature: String?
-    var counter: Int?
     var algorithm: WebAuthnAlgorithm?
     /// For password change only. When registering `password` should be set.
     var newPassword: String?
@@ -138,12 +137,13 @@ struct KeynCredentialsResponse: Codable {
     var accounts: [Int: BulkLoginAccount?]?
     var notes: String?
     var teamId: String?
+    var certificates: [String]?
+    var error: ChiffErrorResponse?
 
     enum CodingKeys: String, CodingKey {
         case username = "u"
         case password = "p"
         case signature = "s"
-        case counter = "n"
         case algorithm = "g"
         case newPassword = "np"
         case browserTab = "b"
@@ -154,6 +154,8 @@ struct KeynCredentialsResponse: Codable {
         case accounts = "d"
         case notes = "y"
         case teamId = "i"
+        case certificates = "c"
+        case error = "e"
     }
 
 }
@@ -189,6 +191,9 @@ public enum KeyIdentifier: String, Codable {
     // NotificationManager
     case subscription
     case endpoint
+
+    // Attestation
+    case attestation
 
     public func identifier(for keychainService: KeychainService) -> String {
         return "\(keychainService.service).\(self.rawValue)"

@@ -48,11 +48,11 @@ public class WebAuthnLoginAuthorizer: Authorizer {
             defer {
                 Logger.shared.analytics(.webAuthnLoginRequestAuthorized, properties: [.value: success])
             }
-            guard var account = try UserAccount.get(id: self.accountId, context: context) else {
+            guard let account = try UserAccount.get(id: self.accountId, context: context) else {
                 throw AccountError.notFound
             }
-            let (signature, counter) = try account.webAuthnSign(challenge: self.challenge, rpId: self.relyingPartyId)
-            try self.session.sendWebAuthnResponse(account: account, browserTab: self.browserTab, type: self.type, context: context, signature: signature, counter: counter)
+            let signature = try account.webAuthnSign(challenge: self.challenge, rpId: self.relyingPartyId)
+            try self.session.sendWebAuthnResponse(account: account, browserTab: self.browserTab, type: self.type, context: context, signature: signature, certificates: nil)
             NotificationCenter.default.postMain(name: .accountsLoaded, object: nil)
             success = true
             return nil

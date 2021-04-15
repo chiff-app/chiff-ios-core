@@ -8,7 +8,7 @@
 import Foundation
 import LocalAuthentication
 import CryptoKit
-import CommonCrypto
+import PromiseKit
 
 enum WebAuthnError: Error {
     case wrongRpId
@@ -32,13 +32,24 @@ public enum WebAuthnAlgorithm: Int, Codable, Equatable {
 }
 
 public struct WebAuthnExtensions: Codable {
-    let hmacSecret: Bool?
-    let credentialProtectionPolicy: Int?
+    let credentialProtectionPolicy: UInt8?
 
     enum CodingKeys: String, CodingKey {
-        case hmacSecret = "hs"
         case credentialProtectionPolicy = "cp"
     }
+}
+
+public struct WebAuthnAttestation: Codable {
+    let signature: String
+    let clientData: Data
+    let certificates: [String]?
+
+    internal init(signature: String, clientData: Data, certificates: [String]?) {
+        self.signature = signature
+        self.clientData = clientData
+        self.certificates = certificates
+    }
+
 }
 
 /// A WebAuthn for an account.
@@ -47,7 +58,6 @@ public struct WebAuthn: Equatable {
     let id: String
     let algorithm: WebAuthnAlgorithm
     let salt: Data
-    var counter: Int = 0
 
     static let cryptoContext = "webauthn"
     static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
@@ -188,99 +198,103 @@ public struct WebAuthn: Equatable {
     ///   - challenge: The challenge to be signed.
     ///   - rpId: The relying party id.
     /// - Throws: Keychain, Crypto or WebAuthn errors.
-    /// - Returns: A tuple with the signature and the used counter.
-    mutating func sign(accountId: String, challenge: String, rpId: String) throws -> (String, Int) {
+    /// - Returns: The signature
+    func sign(accountId: String, challenge: String, rpId: String, extensions: WebAuthnExtensions?) throws -> String {
         guard rpId == id else {
             throw WebAuthnError.wrongRpId
         }
         let challengeData = try Crypto.shared.convertFromBase64(from: challenge)
         let data = try createAuthenticatorData(accountId: nil, extensions: nil) + challengeData
-        return (try sign(accountId: accountId, data: data), counter)
+        return try sign(accountId: accountId, data: data)
     }
 
-    /// Get a self-signed WebAuthn attestation
+    /// Get a WebAuthn attestation
     /// - Parameters:
     ///   - accountId: The account id.
     /// - Throws: Keychain, Crypto or WebAuthn errors.
-    /// - Returns: A triple with the signature, used counter and the attestation data.
-    mutating func signAttestation(accountId: String, clientData: String, extensions: WebAuthnExtensions?) throws -> (String, Int, Data) {
-        let authData = try createAuthenticatorData(accountId: accountId, extensions: extensions)
-        let clientDataHash = try Crypto.shared.convertFromBase64(from: clientData)
-        let data = authData + clientDataHash
-//        let signature = try sign(accountId: accountId, data: data)
-        guard #available(iOS 13.0, *) else {
-            throw WebAuthnError.notSupported
+    /// - Returns: A triple with the signature, used counter and the attestation certificate.
+    func signAttestation(accountId: String, clientData: String, extensions: WebAuthnExtensions?) -> Promise<WebAuthnAttestation> {
+        do {
+            let authData = try createAuthenticatorData(accountId: accountId, extensions: extensions)
+            let clientDataHash = try Crypto.shared.convertFromBase64(from: clientData)
+            let data = authData + clientDataHash
+            if #available(iOS 14.0, *) { // Anonymization CA
+                let privKey = try SecureEnclave.P256.Signing.PrivateKey()
+                let signature = try privKey.signature(for: data)
+                return firstly {
+                    Attestation.attestWebAuthnKeypair(keypair: privKey)
+                }.map { WebAuthnAttestation(signature: signature.derRepresentation.base64, clientData: clientDataHash, certificates: $0) }
+            } else { // Self-signing
+                let signature = try sign(accountId: accountId, data: clientDataHash)
+                return .value(WebAuthnAttestation(signature: signature, clientData: clientDataHash, certificates: nil))
+            }
+        } catch {
+            return Promise(error: error)
         }
-        let trezorPrivKey = try P256.Signing.PrivateKey(rawRepresentation: "cSasK_ZE3GGGrYPvH83xKle1z6IAC4rQJ-lW6FTFCos".fromBase64!)
-        let signature = try trezorPrivKey.signature(for: data)
-        print("Auth data: \(authData.base64)")
-        print("Client data hash: \(clientDataHash.base64)")
-        print("Sig data: \(data.base64)")
-        print("Pub key: \(trezorPrivKey.publicKey.rawRepresentation.base64)")
-        print("Signature: \(signature.derRepresentation.base64)")
-        return (signature.derRepresentation.base64, counter, data)
+
     }
+
 
     // MARK: - Private functions
 
-    private mutating func createAuthenticatorData(accountId: String?, extensions: WebAuthnExtensions?) throws -> Data {
-        counter += 1
+    private func createAuthenticatorData(accountId: String?, extensions: WebAuthnExtensions?) throws -> Data {
         var data = Data()
         data.append(id.sha256Data)
-        data.append(0x05) // UP + UV flags
-        data.append(UInt8((counter >> 24) & 0xff))
-        data.append(UInt8((counter >> 16) & 0xff))
-        data.append(UInt8((counter >> 8) & 0xff))
-        data.append(UInt8((counter >> 0) & 0xff))
+        data.append(contentsOf: [0x05, 0x00, 0x00, 0x00, 0x00]) // UP + UV flags and we're not using the counter.
         if let accountId = accountId {
-            data[32] |= 1 << 6 // Set attestation flag
-            let accountIdData = try Crypto.shared.fromHex(accountId).prefix(16)
-            data.append(WebAuthn.AAGUID)
-            data.append(UInt8((accountIdData.count >> 8) & 0xff))
-            data.append(UInt8(accountIdData.count & 0xff))
-            data.append(accountIdData)
-            switch algorithm {
-            case .edDSA:
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa4, 0x01, 0x01, 0x03, 0x27, 0x20, 0x06, 0x21, 0x58, 0x20))
-                data.append(try pubKey(accountId: accountId))
-            case .ECDSA256:
-                let pubkey: Data = try pubKey(accountId: accountId)
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01, 0x21, 0x58, 0x20))
-                data.append(pubkey.prefix(algorithm.keyLength))
-                data.append(contentsOf: [0x22, 0x58, 0x20])
-                data.append(pubkey.suffix(algorithm.keyLength))
-            case .ECDSA384:
-                let pubkey: Data = try pubKey(accountId: accountId)
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x22, 0x20, 0x02, 0x21, 0x58, 0x30))
-                data.append(pubkey.prefix(algorithm.keyLength))
-                data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x30))
-                data.append(pubkey.suffix(algorithm.keyLength))
-            case .ECDSA512:
-                let pubkey: Data = try pubKey(accountId: accountId)
-                data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x23, 0x20, 0x03, 0x21, 0x58, 0x42))
-                data.append(pubkey.prefix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
-                data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x42))
-                data.append(pubkey.suffix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
-            }
+            try appendAttestation(data: &data, accountId: accountId)
         }
         if let extensions = extensions {
-            var count = 0
-            var extensionData = Data()
-            if extensions.credentialProtectionPolicy != nil {
-                count += 1
-                extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, 0x01))
-            }
-            if let hmac = extensions.hmacSecret, hmac {
-                count += 1
-                extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x68, 0x6D, 0x61, 0x63, 0x2D, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0xf5))
-            }
-            if !extensionData.isEmpty {
-                data[32] |= 1 << 7 // Set extension flag
-                data.append(UInt8(0xa0 + count))
-                data.append(extensionData)
-            }
+            appendExtensions(data: &data, extensions: extensions)
         }
         return data
+    }
+
+    private func appendAttestation(data: inout Data, accountId: String) throws {
+        data[32] |= 1 << 6 // Set attestation flag
+        let accountIdData = try Crypto.shared.fromHex(accountId)
+        data.append(WebAuthn.AAGUID)
+        data.append(UInt8((accountIdData.count >> 8) & 0xff))
+        data.append(UInt8(accountIdData.count & 0xff))
+        data.append(accountIdData)
+        switch algorithm {
+        case .edDSA:
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa4, 0x01, 0x01, 0x03, 0x27, 0x20, 0x06, 0x21, 0x58, 0x20))
+            data.append(try pubKey(accountId: accountId))
+        case .ECDSA256:
+            let pubkey: Data = try pubKey(accountId: accountId)
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01, 0x21, 0x58, 0x20))
+            data.append(pubkey.prefix(algorithm.keyLength))
+            data.append(contentsOf: [0x22, 0x58, 0x20])
+            data.append(pubkey.suffix(algorithm.keyLength))
+        case .ECDSA384:
+            let pubkey: Data = try pubKey(accountId: accountId)
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x22, 0x20, 0x02, 0x21, 0x58, 0x30))
+            data.append(pubkey.prefix(algorithm.keyLength))
+            data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x30))
+            data.append(pubkey.suffix(algorithm.keyLength))
+        case .ECDSA512:
+            let pubkey: Data = try pubKey(accountId: accountId)
+            data.append(contentsOf: [UInt8](arrayLiteral: 0xa5, 0x01, 0x02, 0x03, 0x38, 0x23, 0x20, 0x03, 0x21, 0x58, 0x42))
+            data.append(pubkey.prefix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
+            data.append(contentsOf: [UInt8](arrayLiteral: 0x22, 0x58, 0x42))
+            data.append(pubkey.suffix(algorithm.keyLength + 1)) // We also need the heading zero bytes here
+        }
+    }
+
+    private func appendExtensions(data: inout Data, extensions: WebAuthnExtensions) {
+        var count = 0
+        var extensionData = Data()
+        // Since we should encode CBOR canonical and the key here is 'credProtect' (11 chars) and the next one 'hmac-secret' (12 chars), this one goes first
+        if let policy = extensions.credentialProtectionPolicy {
+            count += 1
+            extensionData.append(contentsOf: [UInt8](arrayLiteral: 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6F, 0x74, 0x65, 0x63, 0x74, policy))
+        }
+        if !extensionData.isEmpty {
+            data[32] |= 1 << 7 // Set extension flag
+            data.append(UInt8(0xa0 + count))
+            data.append(extensionData)
+        }
     }
 
     private func sign(accountId: String, data: Data) throws -> String {
@@ -320,33 +334,6 @@ public struct WebAuthn: Equatable {
             return signature.derRepresentation.base64
         }
     }
-//
-//    private func generateX509Certificate(key: Data) -> Data {
-//        var result = Data()
-//
-//        let encodingLength: Int = (key.count + 1).encodedOctets().count
-//        let OID: [UInt8] = [0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-//            0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05, 0x00]
-//
-//        // ASN.1 SEQUENCE
-//        result.append(0x30)
-//
-//        // Overall size, made of OID + bitstring encoding + actual key
-//        let size = OID.count + 2 + encodingLength + key.count
-//        let encodedSize = size.encodedOctets()
-//        result.append(contentsOf: encodedSize)
-//        result.append(contentsOf: OID)
-//
-//        result.append(0x03)
-//        result.append(contentsOf: (key.count + 1).encodedOctets())
-//        result.append(0x00)
-//
-//        // Actual key bytes
-//
-//        result.append(key)
-//
-//        return result as Data
-//    }
 
 }
 
@@ -356,7 +343,6 @@ extension WebAuthn: Codable {
         case id
         case algorithm
         case salt
-        case counter
     }
 
     public init(from decoder: Decoder) throws {
@@ -369,27 +355,5 @@ extension WebAuthn: Codable {
             var integer = try values.decode(UInt64.self, forKey: .salt)
             self.salt = withUnsafeBytes(of: &integer) { Data($0) }
         }
-        self.counter = try values.decode(Int.self, forKey: .counter)
     }
 }
-
-//extension Int {
-//    func encodedOctets() -> [UInt8] {
-//        // Short form
-//        if self < 128 {
-//            return [UInt8(self)];
-//        }
-//
-//        // Long form
-//        let i = Int(log2(Double(self)) / 8 + 1)
-//        var len = self
-//        var result: [UInt8] = [UInt8(i + 0x80)]
-//
-//        for _ in 0..<i {
-//            result.insert(UInt8(len & 0xFF), at: 1)
-//            len = len >> 8
-//        }
-//
-//        return result
-//    }
-//}

@@ -1,5 +1,5 @@
 //
-//  AddSiteAuthorizer.swift
+//  AddWebAuthnToExistingAuthorizer.swift
 //  ChiffCore
 //
 //  Copyright: see LICENSE.md
@@ -8,25 +8,25 @@
 import LocalAuthentication
 import PromiseKit
 
-public class WebAuthnRegistrationAuthorizer: Authorizer {
+public class AddWebAuthnToExistingAuthorizer: Authorizer {
     public var session: BrowserSession
-    public let type = ChiffMessageType.webauthnCreate
+    public let type = ChiffMessageType.addWebauthnToExisting
     public let browserTab: Int
     let siteName: String
     let siteURL: String
     let siteId: String
     let relyingPartyId: String
     let algorithms: [WebAuthnAlgorithm]
-    let username: String
+    let accountId: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
-    let accountExists: Bool
 
-    public let requestText = "requests.add_account".localized.capitalizedFirstLetter
-    public let successText = "requests.account_added".localized.capitalizedFirstLetter
+    public let requestText = "requests.update_account".localized.capitalizedFirstLetter
+    public let successText = "requests.account_updated".localized.capitalizedFirstLetter
     public var authenticationReason: String {
-        return  String(format: "requests.add_site".localized, siteName)
+        return  String(format: "requests.update_this".localized, siteName)
     }
+
 
     public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
@@ -34,17 +34,16 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
               let siteName = request.siteName,
               let siteURL = request.siteURL,
               let siteId = request.siteID,
-              let username = request.username,
+              let accountId = request.accountID,
               let relyingPartyId = request.relyingPartyId,
               let algorithms = request.algorithms else {
             throw AuthorizationError.missingData
         }
-        self.accountExists = request.accountID != nil
+        self.accountId = accountId
         self.browserTab = browserTab
         self.siteName = siteName
         self.siteURL = siteURL
         self.siteId = siteId
-        self.username = username
         self.relyingPartyId = relyingPartyId
         self.algorithms = algorithms
         self.clientDataHash = request.challenge
@@ -54,21 +53,13 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
 
     public func authorize(startLoading: ((String?) -> Void)?) -> Promise<Account?> {
         var success = false
-        guard !accountExists else {
-            return Promise(error: ChiffErrorResponse.accountExists)
-        }
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
         }.then { (context: LAContext) -> Promise<(UserAccount, WebAuthnAttestation?, LAContext)> in
-            let site = Site(name: self.siteName, id: self.siteId, url: self.siteURL, ppd: nil)
-            let account = try UserAccount(username: self.username,
-                                          sites: [site],
-                                          password: nil,
-                                          rpId: self.relyingPartyId,
-                                          algorithms: self.algorithms,
-                                          notes: nil,
-                                          askToChange: false,
-                                          context: context)
+            guard var account = try UserAccount.get(id: self.accountId, context: context) else {
+                throw AccountError.notFound
+            }
+            try account.addWebAuthn(rpId: self.relyingPartyId, algorithms: self.algorithms, context: context)
             if let clientDataHash = self.clientDataHash {
                 startLoading?("webauthn.attestation".localized)
                 return account.webAuthn!.signAttestation(accountId: account.id, clientData: clientDataHash, extensions: self.extensions).map { (account, $0, context) }

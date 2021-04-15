@@ -104,9 +104,9 @@ public struct BrowserSession: Session {
     /// - Parameters:
     ///   - reason: The cancellation reason.
     ///   - browserTab: The browserTab in the client.
-    func cancelRequest(reason: ChiffMessageType, browserTab: Int) -> Promise<Void> {
+    public func cancelRequest(reason: ChiffMessageType, browserTab: Int, error: ChiffErrorResponse?) -> Promise<Void> {
         do {
-            let response = KeynCredentialsResponse(type: reason, browserTab: browserTab)
+            let response = KeynCredentialsResponse(type: reason, browserTab: browserTab, error: error)
             let jsonMessage = try JSONEncoder().encode(response)
             let ciphertext = try Crypto.shared.encrypt(jsonMessage, key: sharedKey())
             return try sendToVolatileQueue(ciphertext: ciphertext).asVoid()
@@ -217,19 +217,19 @@ public struct BrowserSession: Session {
                                        type: ChiffMessageType,
                                        context: LAContext,
                                        signature: String?,
-                                       counter: Int?) throws {
+                                       certificates: [String]?) throws {
         var response: KeynCredentialsResponse!
         switch type {
-        case .webauthnCreate:
-            response = try KeynCredentialsResponse(type: .webauthnCreate,
+        case .webauthnCreate, .addWebauthnToExisting:
+            response = try KeynCredentialsResponse(type: type,
                                                    browserTab: browserTab,
                                                    signature: signature,
-                                                   counter: counter,
                                                    algorithm: account.webAuthn!.algorithm,
                                                    accountId: account.id,
-                                                   pubKey: account.webAuthnPubKey())
+                                                   pubKey: account.webAuthnPubKey(),
+                                                   certificates: certificates)
         case .webauthnLogin:
-            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature, counter: counter)
+            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature)
         default:
             throw SessionError.unknownType
         }

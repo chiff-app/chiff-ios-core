@@ -1,3 +1,3 @@
 # ChiffCore
 
-A description of this package.
+This library provides the core functionality of Chiff.

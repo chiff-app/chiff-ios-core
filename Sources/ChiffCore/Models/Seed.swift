@@ -27,7 +27,7 @@ public struct Seed {
     public static var hasKeys: Bool {
         return Keychain.shared.has(id: KeyIdentifier.master.identifier(for: .seed), service: .seed) &&
         Keychain.shared.has(id: KeyIdentifier.backup.identifier(for: .seed), service: .seed) &&
-        Keychain.shared.has(id: KeyIdentifier.password.identifier(for: .seed), service: .seed) &&
+        Keychain.shared.has(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed) &&
         Keychain.shared.has(id: KeyIdentifier.pub.identifier(for: .backup), service: .backup) &&
         Keychain.shared.has(id: KeyIdentifier.priv.identifier(for: .backup), service: .backup) &&
         Keychain.shared.has(id: KeyIdentifier.encryption.identifier(for: .backup), service: .backup)
@@ -134,7 +134,7 @@ public struct Seed {
     /// - Throws: `SeedError` if the item is not found.
     /// - Returns: The seed data.
     static func getPasswordSeed(context: LAContext?) throws -> Data {
-        guard let seed = try Keychain.shared.get(id: KeyIdentifier.password.identifier(for: .seed), service: .seed, context: context) else {
+        guard let seed = try Keychain.shared.get(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, context: context) else {
             throw SeedError.notFound
         }
         return seed
@@ -243,7 +243,7 @@ public struct Seed {
         let userId = "\(base64PubKey)_KEYN_USER_ID".sha256
 
         try Keychain.shared.save(id: KeyIdentifier.master.identifier(for: .seed), service: .seed, secretData: seed)
-        try Keychain.shared.save(id: KeyIdentifier.password.identifier(for: .seed), service: .seed, secretData: passwordSeed)
+        try Keychain.shared.save(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, secretData: passwordSeed)
         try Keychain.shared.save(id: KeyIdentifier.backup.identifier(for: .seed), service: .seed, secretData: backupSeed)
         try Keychain.shared.save(id: KeyIdentifier.webauthn.identifier(for: .seed), service: .seed, secretData: webAuthnSeed)
         try Keychain.shared.save(id: KeyIdentifier.encryption.identifier(for: .backup), service: .backup, secretData: encryptionKey)

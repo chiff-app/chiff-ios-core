@@ -24,12 +24,14 @@ extension Keychain {
                 Properties.currentKeychainVersion = 1
                 fallthrough
             case let n where n < 2:
-                try migrateKeychainGroup(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, context: context)
-                try migrateKeychainGroup(id: nil, service: .backup, context: context)
-                try migrateKeychainGroup(id: nil, service: .account(attribute: .notes), context: context)
-                try migrateKeychainGroup(id: nil, service: .account(attribute: .otp), context: context)
-                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: .notes), context: context)
-                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: .otp), context: context)
+                try migrateKeychainGroup(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, oldGroup: KeychainService.seed.accessGroup, context: context)
+                try migrateKeychainGroup(id: nil, service: .backup, oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
+                try migrateKeychainGroup(id: nil, service: .account(attribute: nil), oldGroup: "35MFYY2JY5.io.keyn.confidential", context: context)
+                try migrateKeychainGroup(id: nil, service: .account(attribute: .webauthn), oldGroup: "35MFYY2JY5.io.keyn.confidential", context: context)
+                try migrateKeychainGroup(id: nil, service: .account(attribute: .notes), oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
+                try migrateKeychainGroup(id: nil, service: .account(attribute: .otp), oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
+                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: .notes), oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
+                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: .otp), oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
                 Properties.currentKeychainVersion = 2
             default:
                 return
@@ -41,9 +43,10 @@ extension Keychain {
 
     // MARK: - Private functions
 
-    private func migrateKeychainGroup(id identifier: String?, service: KeychainService, context: LAContext?) throws {
+    private func migrateKeychainGroup(id identifier: String?, service: KeychainService, oldGroup: String, context: LAContext?) throws {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrService as String: service.service,
+                                    kSecAttrAccessGroup as String: oldGroup,
                                     kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail]
 
         if let identifier = identifier {

@@ -80,7 +80,7 @@ public enum KeychainService {
         case .browserSession, .teamSession:
             return "35MFYY2JY5.io.keyn.restricted"      // Shared with notificationExtension and credentialProvider
         case .account, .sharedAccount, .backup, .passwordSeed:
-            return "35MFYY2JY5.io.keyn.confidential"    // Shared with credentialProvider
+            return "group.app.chiff.chiff"              // Shared with credentialProvider
         case .aws, .seed:
             return "35MFYY2JY5.io.keyn.keyn"            // Chiff only
         }

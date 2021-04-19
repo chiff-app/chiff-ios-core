@@ -98,25 +98,25 @@ public struct Properties {
 
     /// Whether the user allows error logging.
     public static var errorLogging: Bool {
-        get { return environment == .beta || UserDefaults.standard.bool(forKey: errorLoggingFlag) }
-        set { UserDefaults.standard.set(newValue, forKey: errorLoggingFlag) }
+        get { return environment == .beta || UserDefaults.group.bool(forKey: errorLoggingFlag) }
+        set { UserDefaults.group.set(newValue, forKey: errorLoggingFlag) }
     }
 
     /// Wheter the user allows analytics messages.
     public static var analyticsLogging: Bool {
-        get { return environment == .beta || UserDefaults.standard.bool(forKey: analyticsLoggingFlag) }
+        get { return environment == .beta || UserDefaults.group.bool(forKey: analyticsLoggingFlag) }
         set {
-            UserDefaults.standard.set(newValue, forKey: analyticsLoggingFlag)
+            UserDefaults.group.set(newValue, forKey: analyticsLoggingFlag)
             Logger.shared.setAnalyticsLogging(value: newValue)
         }
     }
 
     /// Whether the beta user been migrated to production.
     public static var migrated: Bool {
-        get { return environment == .beta && UserDefaults.standard.bool(forKey: migratedFlag) }
+        get { return environment == .beta && UserDefaults.group.bool(forKey: migratedFlag) }
         set {
             guard environment == .beta else { return }
-            UserDefaults.standard.set(newValue, forKey: migratedFlag)
+            UserDefaults.group.set(newValue, forKey: migratedFlag)
         }
     }
 
@@ -128,10 +128,10 @@ public struct Properties {
 
     /// The user ID for this user.
     public static var userId: String? {
-        get { return UserDefaults.standard.string(forKey: userIdFlag) }
+        get { return UserDefaults.group.string(forKey: userIdFlag) }
         set {
             Logger.shared.setUserId(userId: newValue)
-            UserDefaults.standard.set(newValue, forKey: userIdFlag)
+            UserDefaults.group.set(newValue, forKey: userIdFlag)
         }
     }
 
@@ -140,13 +140,13 @@ public struct Properties {
 
     /// The number of accounts, shadowed because Keychain access is authenticated.
     public static var accountCount: Int {
-        get { return UserDefaults.standard.integer(forKey: accountCountFlag) }
-        set { UserDefaults.standard.set(newValue, forKey: accountCountFlag) }
+        get { return UserDefaults.group.integer(forKey: accountCountFlag) }
+        set { UserDefaults.group.set(newValue, forKey: accountCountFlag) }
     }
 
     /// The number of shared accounts, shadowed because Keychain access is authenticated.
     static func getSharedAccountCount(teamId: String) -> Int {
-        if let data = UserDefaults.standard.dictionary(forKey: teamAccountCountFlag) as? [String: Int] {
+        if let data = UserDefaults.group.dictionary(forKey: teamAccountCountFlag) as? [String: Int] {
             return data[teamId] ?? 0
         } else {
             return 0
@@ -155,11 +155,11 @@ public struct Properties {
 
     /// Set number of shared accounts.
     static func setSharedAccountCount(teamId: String, count: Int) {
-        if var data = UserDefaults.standard.dictionary(forKey: teamAccountCountFlag) as? [String: Int] {
+        if var data = UserDefaults.group.dictionary(forKey: teamAccountCountFlag) as? [String: Int] {
             data[teamId] = count
-            UserDefaults.standard.set(data, forKey: teamAccountCountFlag)
+            UserDefaults.group.set(data, forKey: teamAccountCountFlag)
         } else {
-            UserDefaults.standard.set([teamId: count], forKey: teamAccountCountFlag)
+            UserDefaults.group.set([teamId: count], forKey: teamAccountCountFlag)
         }
     }
 
@@ -171,10 +171,13 @@ public struct Properties {
 
     /// Remove relevant user preferences.
     public static func purgePreferences() {
-        UserDefaults.standard.removeObject(forKey: errorLoggingFlag)
-        UserDefaults.standard.removeObject(forKey: analyticsLoggingFlag)
-        UserDefaults.standard.removeObject(forKey: userIdFlag)
-        UserDefaults.standard.removeObject(forKey: migratedFlag)
+        UserDefaults.group.removeObject(forKey: errorLoggingFlag)
+        UserDefaults.group.removeObject(forKey: analyticsLoggingFlag)
+        UserDefaults.group.removeObject(forKey: userIdFlag)
+        UserDefaults.group.removeObject(forKey: migratedFlag)
+        UserDefaults.group.removeObject(forKey: teamAccountCountFlag)
+        UserDefaults.group.removeObject(forKey: accountCountFlag)
+
         // Don't purge keychainVersion here, since new / recovered seed will be saved with latest version.
     }
 
@@ -265,6 +268,18 @@ public struct Properties {
             UserDefaults.standard.set(Properties.version, forKey: lastRunVersionFlag)
         }
         return currentVersion != lastRunVersion
+    }
+
+    public static func migrateToAppGroup() {
+        guard UserDefaults.group.object(forKey: userIdFlag) == nil else {
+            return
+        }
+        UserDefaults.group.setValue(UserDefaults.standard.string(forKey: userIdFlag), forKey: userIdFlag)
+        UserDefaults.group.setValue(UserDefaults.standard.dictionary(forKey: teamAccountCountFlag), forKey: teamAccountCountFlag)
+        UserDefaults.group.setValue(UserDefaults.standard.integer(forKey: accountCountFlag), forKey: accountCountFlag)
+        UserDefaults.group.setValue(UserDefaults.standard.bool(forKey: migratedFlag), forKey: migratedFlag)
+        UserDefaults.group.setValue(UserDefaults.standard.bool(forKey: analyticsLoggingFlag), forKey: analyticsLoggingFlag)
+        UserDefaults.group.setValue(UserDefaults.standard.bool(forKey: errorLoggingFlag), forKey: errorLoggingFlag)
     }
 
 }

@@ -331,3 +331,8 @@ extension DCAppAttestService {
 
 }
 
+extension UserDefaults {
+    public static var group: UserDefaults {
+        return UserDefaults(suiteName: "group.app.chiff.chiff")!
+    }
+}

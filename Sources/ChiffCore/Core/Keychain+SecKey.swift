@@ -45,6 +45,7 @@ public extension Keychain {
     func saveKey<T: SecKeyConvertible>(id identifier: String, key: T) throws {
         // Describe the key.
         let attributes = [kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
+                          kSecAttrAccessGroup: KeychainService.account(attribute: .webauthn).accessGroup,
                           kSecAttrKeyClass: kSecAttrKeyClassPrivate] as [String: Any]
 
         // Get a SecKey representation.

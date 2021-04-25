@@ -24,9 +24,10 @@ extension Keychain {
                 Properties.currentKeychainVersion = 1
                 fallthrough
             case let n where n < 2:
-                try migrateKeychainGroup(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, oldGroup: KeychainService.seed.accessGroup, context: context)
+                try migrateKeychainGroup(id: KeyIdentifier.password.identifier(for: .passwordSeed), service: .passwordSeed, oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
                 try migrateKeychainGroup(id: nil, service: .backup, oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
                 try migrateKeychainGroup(id: nil, service: .account(attribute: nil), oldGroup: "35MFYY2JY5.io.keyn.confidential", context: context)
+                try migrateKeychainGroup(id: nil, service: .sharedAccount(attribute: nil), oldGroup: "35MFYY2JY5.io.keyn.confidential", context: context)
                 try migrateKeychainGroup(id: nil, service: .account(attribute: .webauthn), oldGroup: "35MFYY2JY5.io.keyn.confidential", context: context)
                 try migrateKeychainGroup(id: nil, service: .account(attribute: .notes), oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
                 try migrateKeychainGroup(id: nil, service: .account(attribute: .otp), oldGroup: "35MFYY2JY5.io.keyn.keyn", context: context)
@@ -47,6 +48,8 @@ extension Keychain {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrService as String: service.service,
                                     kSecAttrAccessGroup as String: oldGroup,
+                                    kSecMatchLimit as String: kSecMatchLimitAll,
+                                    kSecReturnAttributes as String: true,
                                     kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail]
 
         if let identifier = identifier {
@@ -57,14 +60,42 @@ extension Keychain {
             query[kSecUseAuthenticationContext as String] = context ?? defaultContext
         }
 
-        let attributes: [String: Any] = [kSecAttrAccessGroup as String: service.accessGroup]
-
-        switch SecItemUpdate(query as CFDictionary, attributes as CFDictionary) {
-        case errSecSuccess, errSecItemNotFound: return
+        var queryResult: AnyObject?
+        switch SecItemCopyMatching(query as CFDictionary, &queryResult) {
+        case errSecSuccess: break
+        case errSecItemNotFound: return
         case -26276, errSecInteractionNotAllowed:
             throw KeychainError.interactionNotAllowed
         case let status:
             throw KeychainError.unhandledError(status.message)
+        }
+        guard let dataArray = queryResult as? [[String: Any]] else {
+            throw KeychainError.unexpectedData
+        }
+
+        for dict in dataArray {
+            if let id = dict[kSecAttrAccount as String] as? String {
+                let attributes: [String: Any] = [
+                    kSecAttrAccessGroup as String: service.accessGroup,
+                ]
+                var updateQuery: [String: Any] = [kSecClass as String:  kSecClassGenericPassword,
+                                                  kSecAttrAccount as String: id,
+                                                  kSecAttrAccessGroup as String: oldGroup,
+                                            kSecAttrService as String: service.service,
+                                            kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail]
+
+                if let defaultContext = service.defaultContext {
+                    updateQuery[kSecUseAuthenticationContext as String] = context ?? defaultContext
+                }
+
+                switch SecItemUpdate(updateQuery as CFDictionary, attributes as CFDictionary) {
+                case errSecSuccess, errSecDuplicateItem: break
+                case -26276, errSecInteractionNotAllowed:
+                    throw KeychainError.interactionNotAllowed
+                case let status:
+                    throw KeychainError.unhandledError(status.message)
+                }
+            }
         }
     }
 

@@ -99,7 +99,10 @@ public struct Properties {
     /// Whether the user allows error logging.
     public static var errorLogging: Bool {
         get { return environment == .beta || UserDefaults.group.bool(forKey: errorLoggingFlag) }
-        set { UserDefaults.group.set(newValue, forKey: errorLoggingFlag) }
+        set {
+            UserDefaults.group.set(newValue, forKey: errorLoggingFlag)
+            Logger.shared.setErrorLogging(value: newValue)
+        }
     }
 
     /// Wheter the user allows analytics messages.

@@ -16,6 +16,10 @@ public protocol LoggerProtocol {
     /// - Parameter value: True to enable, false to disable.
     func setAnalyticsLogging(value: Bool)
 
+    /// Enable / disable error logging.
+    /// - Parameter value: True to enable, false to disable.
+    func setErrorLogging(value: Bool)
+
     /// Log an error with the warning level.
     /// - Parameters:
     ///   - message: The message
@@ -74,6 +78,10 @@ public struct Logger: LoggerProtocol {
     }
 
     public func setAnalyticsLogging(value: Bool) {
+        print("Analytics set to \(value)")
+    }
+
+    public func setErrorLogging(value: Bool) {
         print("Analytics set to \(value)")
     }
 

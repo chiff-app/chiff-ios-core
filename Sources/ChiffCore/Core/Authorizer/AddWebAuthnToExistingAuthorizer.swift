@@ -17,6 +17,7 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
     let siteId: String
     let relyingPartyId: String
     let algorithms: [WebAuthnAlgorithm]
+    let userHandle: String?
     let accountId: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
@@ -46,6 +47,7 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
         self.siteId = siteId
         self.relyingPartyId = relyingPartyId
         self.algorithms = algorithms
+        self.userHandle = request.userHandle
         self.clientDataHash = request.challenge
         self.extensions = request.webAuthnExtensions
         Logger.shared.analytics(.webAuthnCreateRequestOpened)
@@ -59,7 +61,7 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
             guard var account = try UserAccount.get(id: self.accountId, context: context) else {
                 throw AccountError.notFound
             }
-            try account.addWebAuthn(rpId: self.relyingPartyId, algorithms: self.algorithms, context: context)
+            try account.addWebAuthn(rpId: self.relyingPartyId, algorithms: self.algorithms, userHandle: self.userHandle, context: context)
             if let clientDataHash = self.clientDataHash {
                 startLoading?("webauthn.attestation".localized)
                 return account.webAuthn!.signAttestation(accountId: account.id, clientData: clientDataHash, extensions: self.extensions).map { (account, $0, context) }

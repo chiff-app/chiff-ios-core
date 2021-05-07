@@ -41,6 +41,7 @@ class MockAPI: APIProtocol {
                     switch components[2] {
                     case "accounts": return userBackupCallSigned(method: method, message: message, pubKey: String(components[1]), privKey: privKey, body: body)
                     case "sessions": return .value(JSONObject()) // Not implemented yet
+                    case "sshkeys": return .value(JSONObject()) // Not implemented yet
                     default: return Promise(error: MockAPIError.notImplemented)
                     }
                 } else {

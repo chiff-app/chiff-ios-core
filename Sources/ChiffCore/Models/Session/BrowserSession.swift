@@ -229,7 +229,7 @@ public struct BrowserSession: Session {
                                                    pubKey: account.webAuthnPubKey(),
                                                    certificates: certificates)
         case .webauthnLogin:
-            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature)
+            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature, userHandle: account.webAuthn?.userHandle)
         default:
             throw SessionError.unknownType
         }

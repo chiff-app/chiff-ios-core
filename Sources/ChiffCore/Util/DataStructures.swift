@@ -76,7 +76,8 @@ public struct SessionAccount: SessionObject {
     let username: String
     let sites: [SessionSite]
     let hasPassword: Bool
-    let rpId: String?
+    let rpId: String? // WebAuthn
+    let userHandle: String? // WebAuthn
     let sharedAccount: Bool
     var type: SessionObjectType = .account
 
@@ -87,6 +88,7 @@ public struct SessionAccount: SessionObject {
         self.username = account.username
         self.sites = account.sites.map({ SessionSite(site: $0) })
         self.rpId = (account as? UserAccount)?.webAuthn?.id
+        self.userHandle = (account as? UserAccount)?.webAuthn?.userHandle
         self.hasPassword = account.hasPassword
         self.sharedAccount = account is SharedAccount
     }
@@ -167,6 +169,7 @@ struct KeynCredentialsResponse: Codable {
     var teamId: String?
     var certificates: [String]?
     var error: ChiffErrorResponse?
+    var userHandle: String?
 
     enum CodingKeys: String, CodingKey {
         case username = "u"
@@ -184,6 +187,7 @@ struct KeynCredentialsResponse: Codable {
         case teamId = "i"
         case certificates = "c"
         case error = "e"
+        case userHandle = "h"
     }
 
 }

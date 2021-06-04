@@ -14,18 +14,17 @@ public extension BrowserSession {
     /// - Parameter account: The updated account.
     /// - Throws: Encoding or encryption errors.
     func updateSessionAccount(account: SessionAccount) throws -> Promise<Void> {
-        let accountData = try JSONEncoder().encode(account)
-        let ciphertext = try Crypto.shared.encrypt(accountData, key: sharedKey())
-        let message = [
-            "id": account.id,
-            "data": ciphertext.base64
-        ]
-        return API.shared.signedRequest(path: "sessions/\(signingPubKey)/accounts/\(account.id)",
-                                 method: .put,
-                                 privKey: try signingPrivKey(),
-                                 message: message)
-            .asVoid()
-            .log("Failed to update session account")
+        return try updateSessionObject(object: account)
+    }
+
+    /// Update a single `SessionAccount` in this session.
+    /// - Parameter account: The updated account.
+    /// - Throws: Encoding or encryption errors.
+    func updateSSHIdentity(identity: SSHSessionIdentity) throws -> Promise<Void> {
+        guard browser == .cli else {
+            throw SessionError.invalid
+        }
+        return try updateSessionObject(object: identity)
     }
 
     /// Update multiple session accounts for this session.
@@ -108,6 +107,21 @@ public extension BrowserSession {
                                         message: message)
             .asVoid()
             .log("Failed to update session data.")
+    }
+
+    private func updateSessionObject<T: SessionObject>(object: T) throws -> Promise<Void> {
+        let data = try JSONEncoder().encode(object)
+        let ciphertext = try Crypto.shared.encrypt(data, key: sharedKey())
+        let message = [
+            "id": object.id,
+            "data": ciphertext.base64
+        ]
+        return API.shared.signedRequest(path: "sessions/\(signingPubKey)/accounts/\(object.id)",
+                                 method: .put,
+                                 privKey: try signingPrivKey(),
+                                 message: message)
+            .asVoid()
+            .log("Failed to update session account")
     }
 
 }

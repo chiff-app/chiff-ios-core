@@ -68,6 +68,10 @@ public enum AnalyticsEvent: String {
     case webAuthnLoginRequestAuthorized = "WebAuthnLoginRequestAuthorized"
     case updateAccountRequestOpened = "UpdateAccountRequestOpened"
     case updateAccountRequestAuthorized = "UpdateAccountRequestAuthorized"
+    case createSSHKeyRequestOpened = "CreateSSHKeyRequestOpened"
+    case createSSHKeyRequestAuthorized = "CreateSSHKeyRequestAuthorized"
+    case loginWithSSHRequestOpened = "LoginWithSSHRequestOpened"
+    case loginWithSSHRequestAuthorized = "LoginWithSSHRequestAuthorized"
 
     // Local login
     case passwordCopied = "PasswordCopied"
@@ -129,6 +133,8 @@ public enum ChiffMessageType: Int, Codable {
     case updateAccount = 20
     case createOrganisation = 21
     case addWebauthnToExisting = 22
+    case sshCreate = 23
+    case sshLogin = 24
 }
 
 public enum ChiffErrorResponse: String, Error, Codable {

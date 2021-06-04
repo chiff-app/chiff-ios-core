@@ -13,6 +13,9 @@ import Kronos
 import Sodium
 import DataCompression
 import DeviceCheck
+#if os(iOS)
+import UIKit
+#endif
 
 public extension OSStatus {
     /// A human readable message for the OS status.
@@ -335,4 +338,14 @@ extension UserDefaults {
     public static var group: UserDefaults {
         return UserDefaults(suiteName: "group.app.chiff.chiff")!
     }
+}
+
+@available(iOS 13.0, *)
+extension UIImage {
+
+    /// Retrieve an image from ChiffCore.
+    public static func coreImage(named: String) -> UIImage? {
+        return UIImage(named: named, in: Bundle.module, with: nil)
+    }
+
 }

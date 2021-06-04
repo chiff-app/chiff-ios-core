@@ -87,11 +87,21 @@ public extension BrowserSession {
             message["userId"] = userId
         }
         do {
-            let userAccounts = try UserAccount.all(context: nil)
-            message["userAccounts"] = try userAccounts.mapValues { (account) -> String in
+            var userAccounts = try UserAccount.all(context: nil).mapValues { (account) -> String in
                 let accountData = try JSONEncoder().encode(SessionAccount(account: account))
                 return try Crypto.shared.encrypt(accountData, key: sharedKey).base64
             }
+            if browser == .cli {
+                // Add SSH identites
+                let identities = try SSHIdentity.all(context: nil).mapValues { (identity) -> String in
+                    let data = try JSONEncoder().encode(SSHSessionIdentity(identity: identity))
+                    return try Crypto.shared.encrypt(data, key: sharedKey).base64
+                }
+                try userAccounts.merge(identities) { (_, _) in
+                    throw AccountError.duplicateAccountId
+                } // Just take the first, chance is neglectable
+            }
+            message["userAccounts"] = userAccounts
             message["teamAccounts"] = try SharedAccount.all(context: nil).compactMapValues { (account) -> [String: String]? in
                 guard !userAccounts.keys.contains(account.id) else {
                     return nil

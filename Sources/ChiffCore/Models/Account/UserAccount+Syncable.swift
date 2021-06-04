@@ -18,6 +18,10 @@ extension UserAccount: Syncable {
         return .accounts
     }
 
+    public var sync: Bool {
+        return true
+    }
+
     // Documentation in protocol.
     public static func all(context: LAContext?) throws -> [String: UserAccount] {
         // If label is not provided, this method tries to call itself and crashes..

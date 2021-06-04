@@ -137,10 +137,14 @@ requests:
     value: Bevestig login
   confirm_request:
     value: Bevestig verzoek
+  create_ssh_key:
+    value: SSH sleutel genereren
   expired:
     value: >-
       Het onvangen verzoek is verlopen. Het is meer dan 3 minuten geleden
       verstuurd.
+  generate_ssh:
+    value: Genereer SSH sleutel
   get_for:
     comment: 'Ask the user to fill a password, e.g. Fill password for Amazon.com?'
     value: Haal wachtwoord van %@ op.
@@ -185,6 +189,14 @@ requests:
   save:
     comment: 'Ask the user to save a site, e.g. Save Amazon.com?'
     value: Bewaar
+  ssh_key_created:
+    value: SSH sleutel gegenereerd
+  ssh_login:
+    value: Bevestig SSH login
+  ssh_login_authentication:
+    value: Inloggen met SSH
+  ssh_login_success:
+    value: SSH login bevestigd
   to_complete_process:
     value: om het proces te voltooien
   unknown_request:

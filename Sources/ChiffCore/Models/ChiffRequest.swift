@@ -32,6 +32,7 @@ public struct ChiffRequest: Codable {
     public let webAuthnExtensions: WebAuthnExtensions?
     public var sessionID: String?
     public var accounts: [BulkAccount]?
+    public var backup: Bool?
 
     enum CodingKeys: String, CodingKey {
         case accountID = "a"

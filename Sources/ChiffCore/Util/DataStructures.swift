@@ -58,8 +58,18 @@ struct ChiffPersistentQueueMessage: Codable {
     }
 }
 
+enum SessionObjectType: String, Codable {
+    case ssh
+    case account
+}
+
+protocol SessionObject: Codable {
+    var id: String { get }
+    var type: SessionObjectType { get set }
+}
+
 /// The account object that is shared with the session.
-public struct SessionAccount: Codable {
+public struct SessionAccount: SessionObject {
     let id: String
     let askToLogin: Bool?
     let askToChange: Bool?
@@ -68,6 +78,7 @@ public struct SessionAccount: Codable {
     let hasPassword: Bool
     let rpId: String?
     let sharedAccount: Bool
+    var type: SessionObjectType = .account
 
     init(account: Account) {
         self.id = account.id
@@ -80,6 +91,23 @@ public struct SessionAccount: Codable {
         self.sharedAccount = account is SharedAccount
     }
 }
+
+/// The SSH identity object that is shared with the session.
+public struct SSHSessionIdentity: SessionObject {
+    let id: String
+    let pubKey: String
+    let name: String
+    let algorithm: SSHAlgorithm
+    var type: SessionObjectType = .ssh
+
+    init(identity: SSHIdentity) {
+        self.id = identity.id
+        self.pubKey = identity.pubKey
+        self.name = identity.name
+        self.algorithm = identity.algorithm
+    }
+}
+
 
 /// The site object that is shared with the session.
 struct SessionSite: Codable {
@@ -161,7 +189,7 @@ struct KeynCredentialsResponse: Codable {
 }
 
 enum KeyType: UInt64 {
-    case passwordSeed, backupSeed, webAuthnSeed
+    case passwordSeed, backupSeed, webAuthnSeed, sshSeed
 }
 
 public enum CodingError: Error {
@@ -182,6 +210,7 @@ public enum KeyIdentifier: String, Codable {
     case backup
     case master
     case webauthn
+    case ssh
 
     // BackupManager
     case priv

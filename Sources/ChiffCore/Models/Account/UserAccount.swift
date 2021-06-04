@@ -12,7 +12,7 @@ import AuthenticationServices
 import CryptoKit
 import PromiseKit
 
-public struct UserAccount: Account, Equatable {
+public struct UserAccount: Account, Equatable, Identity {
 
     public let id: String
     public var username: String

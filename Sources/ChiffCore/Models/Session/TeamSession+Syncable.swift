@@ -17,6 +17,10 @@ extension TeamSession: Syncable {
         return .sessions
     }
 
+    public var sync: Bool {
+        return true
+    }
+
     // Documentation in protocol
     public static func all(context: LAContext?) throws -> [String: TeamSession] {
         return try Dictionary(uniqueKeysWithValues: all().map { ($0.id, $0) })

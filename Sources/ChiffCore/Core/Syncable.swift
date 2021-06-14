@@ -128,12 +128,10 @@ extension Syncable {
             getData(context: context)
         }.then { (result: [String: BackupType]) -> Promise<Void> in
             var current = try all(context: context).filter { $0.value.sync }
-            print(current)
             var promises: [Promise<Void>] = []
             var changed = result.reduce(false) { (changed, item) -> Bool in
                 do {
                     let (id, backupObject) = item
-                    print(item)
                     if var object = try get(id: id, context: context) {
                         current.removeValue(forKey: object.id)
                         if backupObject.lastChange == object.lastChange {

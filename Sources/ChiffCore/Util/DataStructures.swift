@@ -58,16 +58,28 @@ struct ChiffPersistentQueueMessage: Codable {
     }
 }
 
+enum SessionObjectType: String, Codable {
+    case ssh
+    case account
+}
+
+protocol SessionObject: Codable {
+    var id: String { get }
+    var type: SessionObjectType { get set }
+}
+
 /// The account object that is shared with the session.
-public struct SessionAccount: Codable {
+public struct SessionAccount: SessionObject {
     let id: String
     let askToLogin: Bool?
     let askToChange: Bool?
     let username: String
     let sites: [SessionSite]
     let hasPassword: Bool
-    let rpId: String?
+    let rpId: String? // WebAuthn
+    let userHandle: String? // WebAuthn
     let sharedAccount: Bool
+    var type: SessionObjectType = .account
 
     init(account: Account) {
         self.id = account.id
@@ -76,10 +88,28 @@ public struct SessionAccount: Codable {
         self.username = account.username
         self.sites = account.sites.map({ SessionSite(site: $0) })
         self.rpId = (account as? UserAccount)?.webAuthn?.id
+        self.userHandle = (account as? UserAccount)?.webAuthn?.userHandle
         self.hasPassword = account.hasPassword
         self.sharedAccount = account is SharedAccount
     }
 }
+
+/// The SSH identity object that is shared with the session.
+public struct SSHSessionIdentity: SessionObject {
+    let id: String
+    let pubKey: String
+    let name: String
+    let algorithm: SSHAlgorithm
+    var type: SessionObjectType = .ssh
+
+    init(identity: SSHIdentity) {
+        self.id = identity.id
+        self.pubKey = identity.pubKey
+        self.name = identity.name
+        self.algorithm = identity.algorithm
+    }
+}
+
 
 /// The site object that is shared with the session.
 struct SessionSite: Codable {
@@ -139,6 +169,7 @@ struct KeynCredentialsResponse: Codable {
     var teamId: String?
     var certificates: [String]?
     var error: ChiffErrorResponse?
+    var userHandle: String?
 
     enum CodingKeys: String, CodingKey {
         case username = "u"
@@ -156,12 +187,13 @@ struct KeynCredentialsResponse: Codable {
         case teamId = "i"
         case certificates = "c"
         case error = "e"
+        case userHandle = "h"
     }
 
 }
 
 enum KeyType: UInt64 {
-    case passwordSeed, backupSeed, webAuthnSeed
+    case passwordSeed, backupSeed, webAuthnSeed, sshSeed
 }
 
 public enum CodingError: Error {
@@ -182,6 +214,7 @@ public enum KeyIdentifier: String, Codable {
     case backup
     case master
     case webauthn
+    case ssh
 
     // BackupManager
     case priv

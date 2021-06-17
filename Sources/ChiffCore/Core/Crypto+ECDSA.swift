@@ -36,7 +36,7 @@ public extension Crypto {
         }
     }
 
-    /// Create a ECDSA signing keypair. This is used for WebAuthn.
+    /// Create a ECDSA signing keypair in the secure enclave.
     /// - Parameter seed: The `LocalAuthenticationContext`. Will try to use main context if not provided
     /// - Returns: The keypair.
     func createSecureEnclaveECDSASigningKeyPair(context: LAContext?) throws -> SecureEnclave.P256.Signing.PrivateKey {

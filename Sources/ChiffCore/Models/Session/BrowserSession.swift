@@ -229,7 +229,37 @@ public struct BrowserSession: Session {
                                                    pubKey: account.webAuthnPubKey(),
                                                    certificates: certificates)
         case .webauthnLogin:
-            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature)
+            response = KeynCredentialsResponse(type: .webauthnLogin, browserTab: browserTab, signature: signature, userHandle: account.webAuthn?.userHandle)
+        default:
+            throw SessionError.unknownType
+        }
+
+        let message = try JSONEncoder().encode(response)
+        let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
+
+        try self.sendToVolatileQueue(ciphertext: ciphertext).catchLog("Error sending credentials")
+        try updateLastRequest()
+    }
+
+    /// Respond to a SSH request.
+    /// - Parameters:
+    ///   - id: The fingerprint of the SSH key.
+    ///   - browserTab: The browser tab for the client.
+    ///   - type: The `ChiffMessageType`, which is either SSH create or SSH login request.
+    ///   - context: Optionally, an authenticated `LAContext` object.
+    ///   - signature: The signature, relevant.
+    /// - Throws: Encoding, encryption or network errors.
+    mutating func sendSSHResponse(identity: SSHIdentity,
+                                       browserTab: Int,
+                                       type: ChiffMessageType,
+                                       context: LAContext,
+                                       signature: String?) throws {
+        var response: KeynCredentialsResponse!
+        switch type {
+        case .sshCreate:
+            response = KeynCredentialsResponse(type: .sshCreate, browserTab: browserTab, accountId: identity.id, pubKey: identity.pubKey)
+        case .sshLogin:
+            response = KeynCredentialsResponse(type: .sshLogin, browserTab: browserTab, signature: signature, accountId: identity.id)
         default:
             throw SessionError.unknownType
         }

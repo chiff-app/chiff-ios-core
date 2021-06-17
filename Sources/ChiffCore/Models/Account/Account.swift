@@ -26,19 +26,29 @@ public enum AccountError: Error {
     case importError(failed: Int, total: Int)
 }
 
-public protocol Account: BaseAccount {
+/// Protocol with necessary attributes to show in account overview.
+public protocol Identity: Codable {
+    /// Id of this identity
+    var id: String { get }
+    /// Name of this identity
+    var name: String { get }
+    /// Number of times this identity has been used
+    var timesUsed: Int { get set }
+    /// Last time this identity has been used
+    var lastTimeUsed: Date? { get set }
+
+    /// Delete this account.
+    func delete() -> Promise<Void>
+}
+
+public protocol Account: BaseAccount, Identity {
     var askToLogin: Bool? { get set }
     var askToChange: Bool? { get set }
-    var timesUsed: Int { get set }
-    var lastTimeUsed: Date? { get set }
 
     static var keychainService: KeychainService { get }
     static var otpService: KeychainService { get }
     static var notesService: KeychainService { get }
     static var webAuthnService: KeychainService { get }
-
-    /// Delete this account
-    func delete() -> Promise<Void>
 
     /// Update the secret data
     /// - Parameters:
@@ -49,6 +59,10 @@ public protocol Account: BaseAccount {
 }
 
 public extension Account {
+
+    var name: String {
+        return site.name
+    }
 
     /// Whether this account has an TOTP or HOTP code stored.
     var hasOtp: Bool {

@@ -135,10 +135,14 @@ requests:
     value: Confirm login
   confirm_request:
     value: Confirm request
+  create_ssh_key:
+    value: Create SSH key
   expired:
     value: >-
       The request that was received expired. This means it was sent more than
       three minutes ago.
+  generate_ssh:
+    value: Generate SSH key
   get_for:
     comment: 'Ask the user to fill a password, e.g. Fill password for Amazon.com?'
     value: Get password for %@.
@@ -183,6 +187,14 @@ requests:
   save:
     comment: 'Ask the user to save a site, e.g. Save Amazon.com?'
     value: Save
+  ssh_key_created:
+    value: SSH key created
+  ssh_login:
+    value: Confirm SSH login
+  ssh_login_authentication:
+    value: Login with SSH
+  ssh_login_success:
+    value: SSH login confirmed
   to_complete_process:
     value: to complete the process
   unknown_request:

@@ -222,6 +222,36 @@ public struct TeamSession: Session {
         return seed
     }
 
+    /// Submit an account to the team.
+    /// - Parameter account: The account the user wants to share with the team.
+    public func submitAccountToTeam(account: UserAccount) -> Promise<Void> {
+        do {
+            let passwordGenerator = PasswordGenerator(username: account.username, siteId: account.sites[0].id, ppd: account.sites[0].ppd, passwordSeed: try passwordSeed())
+            var offset: [Int]?
+            if let password = try account.password() {
+                offset = try passwordGenerator.calculateOffset(index: 0, password: password)
+            }
+            let token = try account.oneTimePasswordToken()
+            let newAccount = BackupSharedAccount(
+                id: account.id,
+                username: account.username,
+                sites: account.sites,
+                passwordIndex: 0,
+                passwordOffset: offset,
+                tokenURL: try token?.toURL(),
+                tokenSecret: token?.generator.secret,
+                version: account.version,
+                notes: try account.notes())
+            let data = try JSONEncoder().encode(newAccount)
+            let message: [String: Any] = [
+                "data": try Crypto.shared.encrypt(data, key: self.sharedKey()).base64
+            ]
+            return API.shared.signedRequest(path: "teams/users/\(teamId)/\(id)/accounts/\(account.id)", method: .post, privKey: try signingPrivKey(), message: message).asVoid()
+        } catch {
+            return Promise(error: error)
+        }
+    }
+
     // MARK: - Admin functions
 
     /// Retrieve the team seed remotely aand decrypt it.

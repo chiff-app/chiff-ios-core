@@ -17,6 +17,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
     let siteId: String
     let relyingPartyId: String
     let algorithms: [WebAuthnAlgorithm]
+    let userHandle: String?
     let username: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
@@ -39,6 +40,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
               let algorithms = request.algorithms else {
             throw AuthorizationError.missingData
         }
+        self.userHandle = request.userHandle
         self.accountExists = request.accountID != nil
         self.browserTab = browserTab
         self.siteName = siteName
@@ -61,11 +63,11 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
         }.then { (context: LAContext) -> Promise<(UserAccount, WebAuthnAttestation?, LAContext)> in
             let site = Site(name: self.siteName, id: self.siteId, url: self.siteURL, ppd: nil)
+            let webauthn = try WebAuthn(id: self.relyingPartyId, algorithms: self.algorithms, userHandle: self.userHandle)
             let account = try UserAccount(username: self.username,
                                           sites: [site],
                                           password: nil,
-                                          rpId: self.relyingPartyId,
-                                          algorithms: self.algorithms,
+                                          webauthn: webauthn,
                                           notes: nil,
                                           askToChange: false,
                                           context: context)

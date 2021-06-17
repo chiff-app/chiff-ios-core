@@ -12,7 +12,7 @@ import AuthenticationServices
 import CryptoKit
 import PromiseKit
 
-public struct UserAccount: Account, Equatable {
+public struct UserAccount: Account, Equatable, Identity {
 
     public let id: String
     public var username: String
@@ -50,8 +50,7 @@ public struct UserAccount: Account, Equatable {
     public init(username: String,
                 sites: [Site],
                 password: String?,
-                rpId: String?,
-                algorithms: [WebAuthnAlgorithm]?,
+                webauthn: WebAuthn?,
                 notes: String?,
                 askToChange: Bool?,
                 context: LAContext? = nil,
@@ -64,9 +63,7 @@ public struct UserAccount: Account, Equatable {
         self.username = username
         self.version = Self.currentVersion
         self.askToChange = askToChange
-        if let rpId = rpId, let algorithms = algorithms {
-            self.webAuthn = try WebAuthn(id: rpId, algorithms: algorithms)
-        }
+        self.webAuthn = webauthn
         let keyPair = try webAuthn?.generateKeyPair(accountId: id, context: context)
         self.timesUsed = 0
 
@@ -75,7 +72,7 @@ public struct UserAccount: Account, Equatable {
             let passwordGenerator = PasswordGenerator(username: username, siteId: sites[0].id, ppd: sites[0].ppd, passwordSeed: try Seed.getPasswordSeed(context: context))
             passwordOffset = try passwordGenerator.calculateOffset(index: 0, password: password)
             (generatedPassword, passwordIndex) = try passwordGenerator.generate(index: 0, offset: passwordOffset)
-        } else if rpId != nil && algorithms != nil {
+        } else if webauthn != nil {
             // Initiate the account without a password
             self.passwordIndex = -1
             self.lastPasswordUpdateTryIndex = -1
@@ -218,11 +215,11 @@ public struct UserAccount: Account, Equatable {
         try update(secret: nil)
     }
 
-    mutating func addWebAuthn(rpId: String, algorithms: [WebAuthnAlgorithm], context: LAContext?) throws {
+    mutating func addWebAuthn(rpId: String, algorithms: [WebAuthnAlgorithm], userHandle: String?, context: LAContext?) throws {
         guard self.webAuthn == nil else {
             throw AccountError.webAuthnExists
         }
-        let webAuthn = try WebAuthn(id: rpId, algorithms: algorithms)
+        let webAuthn = try WebAuthn(id: rpId, algorithms: algorithms, userHandle: userHandle)
         let keyPair = try webAuthn.generateKeyPair(accountId: id, context: context)
         try webAuthn.save(accountId: self.id, keyPair: keyPair)
         self.webAuthn = webAuthn

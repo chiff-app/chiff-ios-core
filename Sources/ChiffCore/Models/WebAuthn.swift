@@ -58,6 +58,7 @@ public struct WebAuthn: Equatable {
     let id: String
     let algorithm: WebAuthnAlgorithm
     let salt: Data
+    let userHandle: String?
 
     static let cryptoContext = "webauthn"
     static let AAGUID = Data([UInt8](arrayLiteral: 0x73, 0x07, 0x21, 0x2e, 0xc6, 0xdb, 0x98, 0x5e, 0xcd, 0x80, 0x55, 0xf6, 0x4a, 0x1f, 0x10, 0x07))
@@ -67,7 +68,7 @@ public struct WebAuthn: Equatable {
     ///   - id: The relying party id (RPid)
     ///   - algorithms: The algorithms should be provided in order of preference.
     /// - Throws: Crypto errors if no accepted algorithm is found.
-    init(id: String, algorithms: [WebAuthnAlgorithm]) throws {
+    init(id: String, algorithms: [WebAuthnAlgorithm], userHandle: String?) throws {
         var algorithm: WebAuthnAlgorithm?
         if #available(iOS 13.0, *) {
             algorithm = algorithms.first
@@ -80,6 +81,7 @@ public struct WebAuthn: Equatable {
         self.algorithm = acceptedAlgorithm
         self.id = id
         self.salt = try Crypto.shared.generateSeed(length: 8)
+        self.userHandle = userHandle
     }
 
     /// Generate a WebAuthn signing keypair.
@@ -343,6 +345,7 @@ extension WebAuthn: Codable {
         case id
         case algorithm
         case salt
+        case userHandle
     }
 
     public init(from decoder: Decoder) throws {
@@ -355,5 +358,6 @@ extension WebAuthn: Codable {
             var integer = try values.decode(UInt64.self, forKey: .salt)
             self.salt = withUnsafeBytes(of: &integer) { Data($0) }
         }
+        self.userHandle = try values.decodeIfPresent(String.self, forKey: .userHandle)
     }
 }

@@ -111,14 +111,16 @@ public struct Seed {
             }.then {
                 when(fulfilled:
                     UserAccount.restore(context: context),
-                    TeamSession.restore(context: context))
-            }.then { (accountResult, sessionResult) in
+                    TeamSession.restore(context: context),
+                    SSHIdentity.restore(context: context))
+            }.then { (accountResult, sessionResult, sshResult) in
                 TeamSession.updateAllTeamSessions().map { _ in
-                    return (accountResult, sessionResult)
+                    return (accountResult, sessionResult, sshResult)
                 }
-            }.map { (accountResult, sessionResult) in
+            }.map { (accountResult, sessionResult, sshResult) in
                 Properties.accountCount = accountResult.succeeded
-                return (accountResult, sessionResult)
+                let totalAccount = RecoveryResult(succeeded: accountResult.succeeded + sshResult.succeeded, failed: accountResult.failed + sshResult.failed)
+                return (totalAccount, sessionResult)
             }.recover { error -> Promise<(RecoveryResult, RecoveryResult)> in
                 delete(includeSeed: true)
                 throw error
@@ -163,6 +165,22 @@ public struct Seed {
             let webAuthnSeed = try Crypto.shared.deriveKeyFromSeed(seed: masterSeed, keyType: .webAuthnSeed, context: seedCryptoContext)
             try Keychain.shared.save(id: KeyIdentifier.webauthn.identifier(for: .seed), service: .seed, secretData: webAuthnSeed)
             return webAuthnSeed
+        }
+        return seed
+    }
+
+    /// Retrieve the ssh seed from the Keychain
+    /// - Parameter context: Optionally, an authenticated `LAContext` object.
+    /// - Throws: `SeedError` if the item is not found.
+    /// - Returns: The seed data.
+    static func getSSHSeed(context: LAContext?) throws -> Data {
+        guard let seed = try Keychain.shared.get(id: KeyIdentifier.ssh.identifier(for: .seed), service: .seed, context: context) else {
+            guard let masterSeed = try Keychain.shared.get(id: KeyIdentifier.master.identifier(for: .seed), service: .seed, context: context) else {
+                throw SeedError.notFound
+            }
+            let sshSeed = try Crypto.shared.deriveKeyFromSeed(seed: masterSeed, keyType: .sshSeed, context: seedCryptoContext)
+            try Keychain.shared.save(id: KeyIdentifier.ssh.identifier(for: .seed), service: .seed, secretData: sshSeed)
+            return sshSeed
         }
         return seed
     }

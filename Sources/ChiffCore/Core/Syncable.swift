@@ -17,6 +17,7 @@ public enum SyncError: Error {
 public enum SyncEndpoint: String {
     case sessions
     case accounts
+    case sshkeys
 }
 
 public struct RecoveryResult {
@@ -37,6 +38,8 @@ public protocol Syncable {
 
     var id: String { get }
     var lastChange: Timestamp { get set }
+    // If this is false, the object is not synced.
+    var sync: Bool { get }
 
     static var syncEndpoint: SyncEndpoint { get }
 
@@ -124,7 +127,7 @@ extension Syncable {
         return firstly { () -> Promise<[String: BackupType]> in
             getData(context: context)
         }.then { (result: [String: BackupType]) -> Promise<Void> in
-            var current = try all(context: context)
+            var current = try all(context: context).filter { $0.value.sync }
             var promises: [Promise<Void>] = []
             var changed = result.reduce(false) { (changed, item) -> Bool in
                 do {
@@ -201,6 +204,7 @@ extension Syncable {
     /// Send data to the backup server.
     /// - Parameter item: The object that should be encrypted and sent.
     func sendData<T: BackupObject>(item: T) -> Promise<Void> where T == BackupType {
+        guard sync else { return .value(()) }
         do {
             let data = try JSONEncoder().encode(item)
             let ciphertext = try Crypto.shared.encryptSymmetric(data.compress() ?? data, secretKey: try Self.encryptionKey())
@@ -220,6 +224,7 @@ extension Syncable {
     /// Delete a backup objects.
     /// - Throws: `KeychainError.notFound` if one of the keys cannot be not found.
     func deleteBackup() -> Promise<Void> {
+        guard sync else { return .value(()) }
         return firstly {
             API.shared.signedRequest(path: "users/\(try Self.publicKey())/\(Self.syncEndpoint.rawValue)/\(self.id)",
                                      method: .delete,

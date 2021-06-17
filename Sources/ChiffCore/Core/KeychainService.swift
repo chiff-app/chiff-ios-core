@@ -12,6 +12,7 @@ import LocalAuthentication
 public enum KeychainService {
     case account(attribute: AccountAttribute? = nil)
     case sharedAccount(attribute: AccountAttribute? = nil)
+    case sshIdentity
     case seed
     case passwordSeed
     case browserSession(attribute: SessionAttribute)
@@ -50,6 +51,8 @@ public enum KeychainService {
             } else {
                 return "io.keyn.sharedaccount"
             }
+        case .sshIdentity:
+            return "io.keyn.ssh"
         case .browserSession(let attribute):
             return "io.keyn.session.\(attribute.rawValue)"
         case .teamSession(let attribute):
@@ -81,7 +84,7 @@ public enum KeychainService {
             return "35MFYY2JY5.io.keyn.restricted"      // Shared with notificationExtension and credentialProvider
         case .account, .sharedAccount, .backup, .passwordSeed:
             return "group.app.chiff.chiff"              // Shared with credentialProvider
-        case .aws, .seed:
+        case .aws, .seed, .sshIdentity:
             return "35MFYY2JY5.io.keyn.keyn"            // Chiff only
         }
     }

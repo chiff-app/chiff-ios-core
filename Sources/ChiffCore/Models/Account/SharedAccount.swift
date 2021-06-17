@@ -12,7 +12,7 @@ import AuthenticationServices
 import PromiseKit
 
 /// `SharedAccount`s are managed by a `TeamSession`.
-public struct SharedAccount: Account {
+public struct SharedAccount: Account, Identity {
     public let id: String
     public var username: String
     public var sites: [Site]

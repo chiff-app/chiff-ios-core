@@ -58,7 +58,7 @@ public class AddSiteAuthorizer: Authorizer {
         }.map { context, ppd in
             let site = Site(name: self.siteName, id: self.siteId, url: self.siteURL, ppd: ppd)
             let account = try UserAccount(username: self.username, sites: [site],
-                                          password: self.password, rpId: nil, algorithms: nil,
+                                          password: self.password, webauthn: nil,
                                           notes: self.notes, askToChange: self.askToChange, context: context)
             try self.session.sendCredentials(account: account, browserTab: self.browserTab, type: self.type, context: context, newPassword: nil)
             NotificationCenter.default.postMain(name: .accountsLoaded, object: nil)

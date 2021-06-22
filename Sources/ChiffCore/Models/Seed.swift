@@ -123,6 +123,9 @@ public struct Seed {
                 return (totalAccount, sessionResult)
             }.recover { error -> Promise<(RecoveryResult, RecoveryResult)> in
                 delete(includeSeed: true)
+                TeamSession.purgeSessionDataFromKeychain()
+                UserAccount.deleteAll()
+                SSHIdentity.deleteAll()
                 throw error
             }
         } catch {

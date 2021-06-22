@@ -64,7 +64,6 @@ class SeedTests: XCTestCase {
         Seed.mnemonic().done{ (mnemonic) in
             switch Locale.current.languageCode {
             case "nl":
-                print(mnemonic)
                 XCTAssertEqual(["zucht", "vast", "lans", "troosten", "reclame", "gas", "geen", "blok", "falen", "jammer", "intiem", "kat"], mnemonic)
             default:
                 XCTAssertEqual(TestHelper.mnemonic, mnemonic)

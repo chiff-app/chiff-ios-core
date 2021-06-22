@@ -114,16 +114,20 @@ extension TeamSession {
         let key = try self.passwordSeed()
         var currentAccounts = try SharedAccount.all(context: nil, label: self.id)
         for (id, data) in accounts {
-            currentAccounts.removeValue(forKey: id)
-            let ciphertext = try Crypto.shared.convertFromBase64(from: data)
-            let accountData  = try Crypto.shared.decrypt(ciphertext, key: self.sharedKey(), version: self.version)
-            if var account = try SharedAccount.get(id: id, context: nil) {
-                if try account.sync(accountData: accountData, key: key) {
+            do {
+                currentAccounts.removeValue(forKey: id)
+                let ciphertext = try Crypto.shared.convertFromBase64(from: data)
+                let accountData  = try Crypto.shared.decrypt(ciphertext, key: self.sharedKey(), version: self.version)
+                if var account = try SharedAccount.get(id: id, context: nil) {
+                    if try account.sync(accountData: accountData, key: key) {
+                        changed += 1
+                    }
+                } else { // New account added
+                    try SharedAccount.create(accountData: accountData, id: id, key: key, context: nil, sessionId: self.id)
                     changed += 1
                 }
-            } else { // New account added
-                try SharedAccount.create(accountData: accountData, id: id, key: key, context: nil, sessionId: self.id)
-                changed += 1
+            } catch {
+                Logger.shared.warning("Failed to update account with id \(id)", error: error, userInfo: ["teamId": self.id])
             }
         }
         for account in currentAccounts.values {

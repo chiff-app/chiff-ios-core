@@ -60,7 +60,6 @@ public class ChangeAuthorizer: Authorizer {
             NotificationCenter.default.postMain(name: .passwordChangeConfirmation, object: self.session, userInfo: ["context": context as Any])
             return account
         }.ensure {
-            AuthorizationGuard.shared.authorizationInProgress = false
             Logger.shared.analytics(.changePasswordRequestAuthorized, properties: [.value: success])
         }
     }

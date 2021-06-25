@@ -78,7 +78,6 @@ public class LoginAuthorizer: Authorizer {
             success = true
             return account
         }.ensure {
-            AuthorizationGuard.shared.authorizationInProgress = false
             switch self.type {
             case .login:
                 Logger.shared.analytics(.loginRequestAuthorized, properties: [.value: success])

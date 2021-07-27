@@ -135,6 +135,8 @@ public enum ChiffMessageType: Int, Codable {
     case addWebauthnToExisting = 22
     case sshCreate = 23
     case sshLogin = 24
+    
+    // TODO: - NEED TO ADD STRING VALUE
 }
 
 public enum ChiffErrorResponse: String, Error, Codable {

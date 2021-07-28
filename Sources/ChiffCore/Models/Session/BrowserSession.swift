@@ -105,6 +105,7 @@ public struct BrowserSession: Session {
     ///   - reason: The cancellation reason.
     ///   - browserTab: The browserTab in the client.
     public func cancelRequest(reason: ChiffMessageType, browserTab: Int, error: ChiffErrorResponse?) -> Promise<Void> {
+        ChiffRequestsLogStorage.sharedStorage.updateLogWithDeclineFor(browserTab: browserTab)
         do {
             let response = KeynCredentialsResponse(type: reason, browserTab: browserTab, error: error)
             let jsonMessage = try JSONEncoder().encode(response)

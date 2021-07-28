@@ -151,6 +151,7 @@ public enum ChiffMessageType: Int, Codable {
         case .createOrganisation: String(format: "logs.team_created".localized, param)
         case .sshCreate: String(format: "logs.ssh_created".localized, param)
         case .sshLogin: String(format: "logs.ssh_login".localized, param)
+        default: "logs.unknown".localized
         }
     }
 }

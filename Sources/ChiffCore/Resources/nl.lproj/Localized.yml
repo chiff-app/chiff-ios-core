@@ -109,6 +109,7 @@ logs:
   ssh_login: Ingelogd via SSH met %@
   team_created: Team %@ gemaakt
   team_login: Ingelogd bij team %@
+  unknown: Onbekende actie
   update_account: Account voor %@ geüpdatet
 requests:
   account_added:

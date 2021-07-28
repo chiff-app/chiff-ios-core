@@ -109,6 +109,7 @@ logs:
   ssh_login: Logged in to SSH with %@
   team_created: Team %@ created
   team_login: Logged in to team %@
+  unknown: Unknown request
   update_account: Account for %@ updated
 requests:
   account_added:

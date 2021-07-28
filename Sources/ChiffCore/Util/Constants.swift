@@ -136,7 +136,23 @@ public enum ChiffMessageType: Int, Codable {
     case sshCreate = 23
     case sshLogin = 24
     
-    // TODO: - NEED TO ADD STRING VALUE
+    func logString(param: String) -> String {
+        switch self {
+        case .login, .webauthnLogin: String(format: "logs.login".localized, param)
+        case .add, .register, .addAndLogin, .webauthnCreate: String(format: "logs.add".localized, param)
+        case .addBulk: String(format: "logs.add_bulk".localized, param) // Here the param is the number of accounts
+        case .fill: String(format: "logs.fill".localized, param)
+        case .addToExisting: String(format: "logs.add_to_existing".localized, param)
+        case .adminLogin: String(format: "logs.team_login".localized, param)
+        case .addWebauthnToExisting: String(format: "logs.add_webauthn".localized, param)
+        case .bulkLogin: String(format: "logs.add_webauthn".localized, param) // Here the param is the number of accounts
+        case .getDetails: String(format: "logs.get_details".localized, param)
+        case .updateAccount: String(format: "logs.update_account".localized, param)
+        case .createOrganisation: String(format: "logs.team_created".localized, param)
+        case .sshCreate: String(format: "logs.ssh_created".localized, param)
+        case .sshLogin: String(format: "logs.ssh_login".localized, param)
+        }
+    }
 }
 
 public enum ChiffErrorResponse: String, Error, Codable {

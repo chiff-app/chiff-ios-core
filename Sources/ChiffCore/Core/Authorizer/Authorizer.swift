@@ -27,8 +27,12 @@ public protocol Authorizer {
     var authenticationReason: String { get }
     var requestText: String { get }
     var successText: String { get }
+    var logParam: String { get }
 
     init(request: ChiffRequest, session: BrowserSession) throws
+
+    /// Write a log entry for this request.
+    func writeLog(isRejected: Bool)
 
     /// Start the authorization process to handle this request.
     /// - Parameter startLoading: This callback can be used for requests that may take a while to inform the user about the progress.
@@ -36,6 +40,11 @@ public protocol Authorizer {
 }
 
 public extension Authorizer {
+
+    func writeLog(isRejected: Bool) {
+        let log = ChiffRequestLogModel(sessionId: session.id, param: logParam, type: type, browserTab: browserTab, isRejected: isRejected)
+        ChiffRequestsLogStorage.sharedStorage.save(log: log)
+    }
 
     /// Notifies the session client that this request is rejected.
     func rejectRequest() -> Guarantee<Void> {
@@ -49,6 +58,8 @@ public extension Authorizer {
     func cancelRequest(reason: ChiffMessageType, error: ChiffErrorResponse?) -> Guarantee<Void> {
         return firstly {
             session.cancelRequest(reason: reason, browserTab: browserTab, error: error)
+        }.ensure {
+            self.writeLog(isRejected: true)
         }.recover { error in
             Logger.shared.error("Reject message could not be sent.", error: error)
             return

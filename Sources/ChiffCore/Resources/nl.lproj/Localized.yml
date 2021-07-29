@@ -95,22 +95,38 @@ errors:
         Authenticatie kan niet gestart worden, omdat de toegangscode niet is
         ingesteld op de telefoon.
 logs:
-  add: Account gemaakt voor %@
-  add_bulk: '%@ accounts geïmporteerd'
-  add_to_existing: URL toegevoegd aan %@
-  add_webauthn: WebAuthn toegevoegd aan %@
-  bulk_login: Ingelogd bij %@ accounts
-  change: Wachtwoord gewijzigd @ %@
-  fill: Wachtwoord opgehaald voor %@
-  get_details: Account voor %@ opgehaald
-  login: Ingelogd bij %@
-  register: Account gemaakt voor %@
-  ssh_created: 'Nieuwe SSH sleutel gemaakt: %@'
-  ssh_login: Ingelogd via SSH met %@
-  team_created: Team %@ gemaakt
-  team_login: Ingelogd bij team %@
-  unknown: Onbekende actie
-  update_account: Account voor %@ geüpdatet
+  add:
+    value: Account gemaakt voor %@
+  add_bulk:
+    value: '%@ accounts geïmporteerd'
+  add_to_existing:
+    value: URL toegevoegd aan %@
+  add_webauthn:
+    value: WebAuthn toegevoegd aan %@
+  bulk_login:
+    value: Ingelogd bij %@ accounts
+  change:
+    value: Wachtwoord gewijzigd @ %@
+  fill:
+    value: Wachtwoord opgehaald voor %@
+  get_details:
+    value: Account voor %@ opgehaald
+  login:
+    value: Ingelogd bij %@
+  register:
+    value: Account gemaakt voor %@
+  ssh_created:
+    value: 'Nieuwe SSH sleutel gemaakt: %@'
+  ssh_login:
+    value: Ingelogd via SSH met %@
+  team_created:
+    value: Team %@ gemaakt
+  team_login:
+    value: Ingelogd bij team %@
+  unknown:
+    value: Onbekende actie
+  update_account:
+    value: Account voor %@ geüpdatet
 requests:
   account_added:
     value: Account toegevoegd

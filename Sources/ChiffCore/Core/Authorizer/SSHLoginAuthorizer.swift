@@ -14,6 +14,7 @@ public class SSHLoginAuthorizer: Authorizer {
     public let browserTab: Int
     public let challenge: String
     public let id: String
+    public var logParam: String
 
     public let requestText = "requests.ssh_login".localized.capitalizedFirstLetter
     public let successText = "requests.ssh_login_success".localized.capitalizedFirstLetter
@@ -24,6 +25,7 @@ public class SSHLoginAuthorizer: Authorizer {
     public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
         guard let browserTab = request.browserTab,
+              let name = request.siteName,
               let id = request.accountID,
               let challenge = request.challenge else {
             throw AuthorizationError.missingData
@@ -31,6 +33,7 @@ public class SSHLoginAuthorizer: Authorizer {
         self.browserTab = browserTab
         self.challenge = challenge
         self.id = id
+        self.logParam = name
         Logger.shared.analytics(.loginWithSSHRequestOpened)
     }
 
@@ -49,7 +52,8 @@ public class SSHLoginAuthorizer: Authorizer {
             success = true
             return .value(nil)
         }.ensure {
-             Logger.shared.analytics(.loginWithSSHRequestAuthorized, properties: [.value: success])
+            self.writeLog(isRejected: false)
+            Logger.shared.analytics(.loginWithSSHRequestAuthorized, properties: [.value: success])
         }
     }
 

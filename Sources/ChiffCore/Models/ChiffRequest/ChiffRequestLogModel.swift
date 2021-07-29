@@ -7,65 +7,76 @@
 
 import Foundation
 
-public struct ChiffRequestLogModel: Codable, Equatable {
-    enum CodingKeys: String, CodingKey {
-        case siteName
-        case sessionID
-        case type
-        case requsetDate
-        case isRejected
-        case browserTab
-    }
-    
-    public init(request: ChiffRequest) {
-        siteName = request.siteName
-        sessionID = request.sessionID
-        type = request.type
-        isRejected = request.type == .reject
-        browserTab = request.browserTab ?? 0
-        requsetDate = Date(timeIntervalSince1970: Double(request.sentTimestamp) / 1000.0)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(siteName, forKey: .siteName)
-        try container.encode(sessionID, forKey: .sessionID)
-        try container.encode(type, forKey: .type)
-        try container.encode(requsetDate, forKey: .requsetDate)
-        try container.encode(isRejected, forKey: .isRejected)
-        try container.encode(browserTab, forKey: .browserTab)
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        siteName = try container.decode(String.self, forKey: .siteName)
-        sessionID = try container.decode(String.self, forKey: .sessionID)
-        type = try container.decode(ChiffMessageType.self, forKey: .type)
-        requsetDate = try container.decode(Date.self, forKey: .requsetDate)
-        isRejected = try container.decode(Bool.self, forKey: .isRejected)
-        browserTab = try container.decode(Int.self, forKey: .browserTab)
-    }
-    
+public struct ChiffRequestLogModel: Codable {
+    public let param: String
+    public let sessionId: String
+    public let type: ChiffMessageType
+    public let browserTab: Int
     public var isRejected: Bool
-    public var siteName: String?
-    public var sessionID: String?
-    public var type: ChiffMessageType
-    public var browserTab: Int
+    private let date: Date
+
+    public var logString: String {
+        return  "\(dateString) \(accountString) \(isRejected ? "(declined)" : "")"
+    }
     
-    public var dateString: String {
-        guard let date = requsetDate else {
-            return ""
-        }
+    private var dateString: String {
         let dateFormatterGet = DateFormatter()
         dateFormatterGet.dateFormat = "dd-MM-yyyy HH:mm:ss"
         return dateFormatterGet.string(from: date)
     }
-   
-    private var requsetDate: Date?
-    
+
+    private var accountString: String {
+        switch self.type {
+        case .login, .webauthnLogin:
+            return String(format: "logs.login".localized, param)
+        case .change:
+            return String(format: "logs.change".localized, param)
+        case .add, .register, .addAndLogin, .webauthnCreate:
+            return String(format: "logs.add".localized, param)
+        case .addBulk:
+            return String(format: "logs.add_bulk".localized, param)
+        case .fill:
+            return String(format: "logs.fill".localized, param)
+        case .addToExisting:
+            return String(format: "logs.add_to_existing".localized, param)
+        case .adminLogin:
+            return String(format: "logs.team_login".localized, param)
+        case .addWebauthnToExisting:
+            return String(format: "logs.add_webauthn".localized, param)
+        case .bulkLogin:
+            return String(format: "logs.add_webauthn".localized, param)
+        case .getDetails:
+            return String(format: "logs.get_details".localized, param)
+        case .updateAccount:
+            return String(format: "logs.update_account".localized, param)
+        case .createOrganisation:
+            return String(format: "logs.team_created".localized, param)
+        case .sshCreate:
+            return String(format: "logs.ssh_created".localized, param)
+        case .sshLogin:
+            return String(format: "logs.ssh_login".localized, param)
+        default:
+           return "logs.unknown".localized
+        }
+    }
+
+    public init(sessionId: String, param: String, type: ChiffMessageType, browserTab: Int, isRejected: Bool) {
+        self.sessionId = sessionId
+        self.param = param
+        self.type = type
+        self.browserTab = browserTab
+        self.isRejected = isRejected
+        self.date = Date()
+    }
+
+}
+
+extension ChiffRequestLogModel: Equatable {
+
     public static func == (lhs: ChiffRequestLogModel, rhs: ChiffRequestLogModel) -> Bool {
-        return lhs.sessionID == rhs.sessionID &&
-            lhs.siteName == rhs.siteName &&
+        return lhs.sessionId == rhs.sessionId &&
+            lhs.param == rhs.param &&
             lhs.browserTab == rhs.browserTab
     }
+
 }

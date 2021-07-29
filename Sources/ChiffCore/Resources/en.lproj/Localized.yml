@@ -95,22 +95,38 @@ errors:
         Authentication could not start, because passcode is not set on the
         device.
 logs:
-  add: Account created for %@
-  add_bulk: '%@ accounts imported'
-  add_to_existing: URL added to %@
-  add_webauthn: WebAuthn added to %@
-  bulk_login: Logged in to %@ accounts
-  change: Password changed @ %@
-  fill: Password retrieved for %@
-  get_details: Account for %@ retrieved
-  login: Logged in @ %@
-  register: Account created for %@
-  ssh_created: 'New SSH key created: %@'
-  ssh_login: Logged in to SSH with %@
-  team_created: Team %@ created
-  team_login: Logged in to team %@
-  unknown: Unknown request
-  update_account: Account for %@ updated
+  add:
+    value: Account created for %@
+  add_bulk:
+    value: '%@ accounts imported'
+  add_to_existing:
+    value: URL added to %@
+  add_webauthn:
+    value: WebAuthn added to %@
+  bulk_login:
+    value: Logged in to %@ accounts
+  change:
+    value: Password changed @ %@
+  fill:
+    value: Password retrieved for %@
+  get_details:
+    value: Account for %@ retrieved
+  login:
+    value: Logged in @ %@
+  register:
+    value: Account created for %@
+  ssh_created:
+    value: 'New SSH key created: %@'
+  ssh_login:
+    value: Logged in to SSH with %@
+  team_created:
+    value: Team %@ created
+  team_login:
+    value: Logged in to team %@
+  unknown:
+    value: Unknown request
+  update_account:
+    value: Account for %@ updated
 requests:
   account_added:
     value: Account added

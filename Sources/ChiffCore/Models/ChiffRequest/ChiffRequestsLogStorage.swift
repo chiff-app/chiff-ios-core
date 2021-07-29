@@ -10,10 +10,11 @@ import Foundation
 public class ChiffRequestsLogStorage: NSObject {
     
     public static let sharedStorage = ChiffRequestsLogStorage()
-    
+    private var logs: [ChiffRequestLogModel]?
+
     public func updateLogWithDeclineFor(browserTab: Int) {
-        let _ = getLogs()
-        if var logModel = ChiffRequestsLogStorage.logsArray?.filter({ model in model.browserTab == browserTab}).first  {
+        try? loadLogs()
+        if var logModel = logs?.filter({ $0.browserTab == browserTab}).first  {
             logModel.isRejected = true
             save(log: logModel)
         }
@@ -21,56 +22,42 @@ public class ChiffRequestsLogStorage: NSObject {
     
     public func save(log: ChiffRequestLogModel) {
         do {
-            if ChiffRequestsLogStorage.logsArray == nil {
-                ChiffRequestsLogStorage.logsArray = [ChiffRequestLogModel]()
-            }
-            if let logModel = ChiffRequestsLogStorage.logsArray?.filter({ model in model.browserTab == log.browserTab}).first  {
-                var tmpArray:[ChiffRequestLogModel] = ChiffRequestsLogStorage.logsArray!
+            if let logModel = logs?.filter({ $0.browserTab == log.browserTab}).first  {
+                var tmpArray:[ChiffRequestLogModel] = logs!
                 tmpArray.remove(at: (tmpArray.firstIndex(of: logModel))!)
-                ChiffRequestsLogStorage.logsArray = tmpArray
+                logs = tmpArray
             }
-            ChiffRequestsLogStorage.logsArray?.append(log)
+            self.logs?.append(log)
             
-            let logData = try PropertyListEncoder().encode(ChiffRequestsLogStorage.logsArray!)
-            try logData.write(to: ChiffRequestsLogStorage.path)
-            ChiffRequestsLogStorage.logsArray = nil
+            let logData = try PropertyListEncoder().encode(logs)
+            try logData.write(to: Self.path)
         } catch {
-            print("Couldn't write file")
+            Logger.shared.warning("Failed to write device logging.", error: error)
         }
     }
 
-    public func getLogForSession(ID: String) -> [ChiffRequestLogModel]? {
-        try? getLogFor(ID: ID)
+    public func getLogForSession(id: String) throws -> [ChiffRequestLogModel] {
+        try loadLogs()
+        return logs?.filter { $0.sessionId == id } ?? []
     }
     
-    private func getLogFor(ID: String) throws -> [ChiffRequestLogModel] {
-        guard ChiffRequestsLogStorage.logsArray == nil else {
-            return ChiffRequestsLogStorage.logsArray!.filter { model in
-                model.sessionID == ID
-            }
+    private func loadLogs() throws {
+        guard logs == nil else {
+            return
         }
-        
-        let _ = try getLogs()
-        
-        return ChiffRequestsLogStorage.logsArray?.filter({ model in
-            model.sessionID == ID
-        }) ??  [ChiffRequestLogModel]()
-        
+        guard let data = try? Data(contentsOf: Self.path, options: .alwaysMapped) else {
+            logs = []
+            return
+        }
+        logs = try PropertyListDecoder().decode([ChiffRequestLogModel].self, from: data)
     }
-    
-    private func getLogs() -> [ChiffRequestLogModel]? {
-        let data = try! Data(contentsOf: ChiffRequestsLogStorage.path, options: .alwaysMapped)
-        ChiffRequestsLogStorage.logsArray = try? PropertyListDecoder().decode([ChiffRequestLogModel].self, from: data)
-        
-        return ChiffRequestsLogStorage.logsArray
-    }
-    
-    private static var logsArray: [ChiffRequestLogModel]?
+
     private static let fileName = "RequestsData.log"
-    private static let path = getDocumentsDirectory().appendingPathComponent(ChiffRequestsLogStorage.fileName)
+    private static let path = URL(fileURLWithPath: ChiffRequestsLogStorage.fileName, relativeTo: getDocumentsDirectory())
     
     static private func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
+
 }

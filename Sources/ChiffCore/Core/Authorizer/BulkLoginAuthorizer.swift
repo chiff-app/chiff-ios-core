@@ -14,6 +14,9 @@ public class BulkLoginAuthorizer: Authorizer {
     public let browserTab: Int
     let count: Int
     let accountIds: [Int: String]
+    public var logParam: String {
+        return String(count)
+    }
 
     public let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
     public let successText = "requests.login_succesful".localized.capitalizedFirstLetter
@@ -48,6 +51,7 @@ public class BulkLoginAuthorizer: Authorizer {
             try self.session.sendBulkLoginResponse(browserTab: self.browserTab, accounts: loginAccounts, context: context)
             return nil
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.bulkLoginRequestAuthorized)
         }
     }

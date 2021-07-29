@@ -24,7 +24,7 @@ public struct ChiffRequest: Codable {
     public let relyingPartyId: String?
     public let algorithms: [WebAuthnAlgorithm]?
     public let username: String?
-    public let sentTimestamp: TimeInterval
+    public let sentTimestamp: Timestamp
     public let count: Int?
     public let orderKey: String?
     public let organisationName: String?

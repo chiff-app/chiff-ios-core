@@ -13,6 +13,10 @@ public class AddBulkSiteAuthorizer: Authorizer {
     public let type = ChiffMessageType.addBulk
     public let browserTab: Int
     public let count: Int
+    public var logParam: String {
+        return String(count)
+    }
+
 
     public let requestText = "requests.add_accounts".localized.capitalizedFirstLetter
     public var successText: String {
@@ -74,6 +78,7 @@ public class AddBulkSiteAuthorizer: Authorizer {
             }
             return nil
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.addBulkSitesRequestAuthorized, properties: [.value: !succeeded.isEmpty])
         }
     }

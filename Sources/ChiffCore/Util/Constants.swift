@@ -135,39 +135,6 @@ public enum ChiffMessageType: Int, Codable {
     case addWebauthnToExisting = 22
     case sshCreate = 23
     case sshLogin = 24
-    
-    public func logString(param: String) -> String {
-        switch self {
-        case .login, .webauthnLogin:
-            return String(format: "logs.login".localized, param)
-        case .add, .register, .addAndLogin, .webauthnCreate:
-            return String(format: "logs.add".localized, param)
-        case .addBulk:
-            return String(format: "logs.add_bulk".localized, param) // Here the param is the number of accounts
-        case .fill:
-            return String(format: "logs.fill".localized, param)
-        case .addToExisting:
-            return String(format: "logs.add_to_existing".localized, param)
-        case .adminLogin:
-            return String(format: "logs.team_login".localized, param)
-        case .addWebauthnToExisting:
-            return String(format: "logs.add_webauthn".localized, param)
-        case .bulkLogin:
-            return String(format: "logs.add_webauthn".localized, param) // Here the param is the number of accounts
-        case .getDetails:
-            return String(format: "logs.get_details".localized, param)
-        case .updateAccount:
-            return String(format: "logs.update_account".localized, param)
-        case .createOrganisation:
-            return String(format: "logs.team_created".localized, param)
-        case .sshCreate:
-            return String(format: "logs.ssh_created".localized, param)
-        case .sshLogin:
-            return String(format: "logs.ssh_login".localized, param)
-        default:
-           return "logs.unknown".localized
-        }
-    }
 }
 
 public enum ChiffErrorResponse: String, Error, Codable {

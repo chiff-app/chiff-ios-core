@@ -5,10 +5,10 @@
 //  Copyright: see LICENSE.md
 //
 
-import Foundation
-import OneTimePassword
-import LocalAuthentication
 import AuthenticationServices
+import Foundation
+import LocalAuthentication
+import OneTimePassword
 import PromiseKit
 
 public enum AccountError: Error {
@@ -24,6 +24,37 @@ public enum AccountError: Error {
     case webAuthnExists
     case notTOTP
     case importError(failed: Int, total: Int)
+}
+
+extension AccountError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "" // TODO: ADD DESCRIPRION
+        case .duplicateAccountId:
+            return "" // TODO: ADD DESCRIPRION
+        case .accountsNotLoaded:
+            return "" // TODO: ADD DESCRIPRION
+        case .notFound:
+            return "" // TODO: ADD DESCRIPRION
+        case .missingContext:
+            return "" // TODO: ADD DESCRIPRION
+        case .passwordGeneration:
+            return "" // TODO: ADD DESCRIPRION
+        case .tokenRetrieval:
+            return "" // TODO: ADD DESCRIPRION
+        case .wrongRpId:
+            return "" // TODO: ADD DESCRIPRION
+        case .noWebAuthn:
+            return "" // TODO: ADD DESCRIPRION
+        case .webAuthnExists:
+            return "" // TODO: ADD DESCRIPRION
+        case .notTOTP:
+            return "" // TODO: ADD DESCRIPRION
+        case .importError(failed: let failed, total: let total):
+            return String(format: "errors.failed_accounts_message".localized, failed, total)
+        }
+    }
 }
 
 /// Protocol with necessary attributes to show in account overview.
@@ -59,7 +90,6 @@ public protocol Account: BaseAccount, Identity {
 }
 
 public extension Account {
-
     var name: String {
         return site.name
     }
@@ -135,8 +165,9 @@ public extension Account {
             }
             let secret = try Keychain.shared.get(id: id, service: Self.otpService, context: nil)
             guard let urlString = String(data: urlData, encoding: .utf8),
-                let url = URL(string: urlString) else {
-                    throw CodingError.unexpectedData
+                let url = URL(string: urlString)
+            else {
+                throw CodingError.unexpectedData
             }
 
             return Token(url: url, secret: secret)
@@ -186,8 +217,8 @@ public extension Account {
             try Keychain.shared.delete(id: id, service: Self.keychainService)
             try? Keychain.shared.delete(id: id, service: Self.notesService)
             try? Keychain.shared.delete(id: id, service: Self.otpService)
-            self.deleteFromToIdentityStore()
-            return when(fulfilled: try BrowserSession.all().map({ $0.deleteAccount(accountId: self.id) }))
+            deleteFromToIdentityStore()
+            return when(fulfilled: try BrowserSession.all().map { $0.deleteAccount(accountId: self.id) })
         } catch {
             return Promise(error: error)
         }
@@ -247,7 +278,7 @@ public extension Account {
     /// - Returns: A dictionary of `Account`s, where the keys are the ids.
     static func allCombined(context: LAContext?, migrateVersion: Bool = false) throws -> [String: Account] {
         let sharedAccounts: [String: Account] = try all(context: context, service: .sharedAccount()) as [String: SharedAccount]
-        let userAccounts: [String: Account] = try all(context: context, service: .account()).mapValues({ (account: UserAccount) -> Account in
+        let userAccounts: [String: Account] = try all(context: context, service: .account()).mapValues { (account: UserAccount) -> Account in
             var account = account
             if migrateVersion, account.version < 1 {
                 account.updateVersion(context: context)
@@ -256,8 +287,8 @@ public extension Account {
                 account.shadowing = true
             }
             return account as Account
-        })
-        return userAccounts.merging(sharedAccounts) { (userAccount, _) in userAccount }
+        }
+        return userAccounts.merging(sharedAccounts) { userAccount, _ in userAccount }
     }
 
     // MARK: - Private methods
@@ -279,7 +310,7 @@ public extension Account {
         Properties.accountCount = dataArray.count
         let decoder = PropertyListDecoder()
 
-        return Dictionary(uniqueKeysWithValues: try dataArray.map { (dict) in
+        return Dictionary(uniqueKeysWithValues: try dataArray.map { dict in
             guard let accountData = dict[kSecAttrGeneric as String] as? Data else {
                 throw CodingError.unexpectedData
             }
@@ -287,5 +318,4 @@ public extension Account {
             return (account.id, account)
         })
     }
-
 }

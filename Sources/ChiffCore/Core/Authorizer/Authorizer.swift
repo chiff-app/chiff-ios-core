@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import OneTimePassword
 import LocalAuthentication
+import OneTimePassword
 import PromiseKit
 
 public enum AuthorizationError: Error {
@@ -18,6 +18,23 @@ public enum AuthorizationError: Error {
     case unknownType
     case missingData
     case multipleAdminSessionsFound(count: Int)
+}
+
+extension AuthorizationError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .cannotChangeAccount:
+            return "errors.shared_account_change".localized
+        case .noTeamSessionFound:
+            return "errors.no_team".localized
+        case .notAdmin:
+            return "errors.no_admin".localized
+        case .multipleAdminSessionsFound(count: let count):
+            return String(format: "errors.multiple_admins".localized, count)
+        case .inProgress, .missingData, .unknownType:
+            return "" // TODO: NEED TO ADD DESCRIPTION
+        }
+    }
 }
 
 public protocol Authorizer {
@@ -36,7 +53,6 @@ public protocol Authorizer {
 }
 
 public extension Authorizer {
-
     /// Notifies the session client that this request is rejected.
     func rejectRequest() -> Guarantee<Void> {
         return cancelRequest(reason: .reject, error: nil)
@@ -61,8 +77,6 @@ public extension Authorizer {
             return "requests.login_keyn_next_time".localized.capitalizedFirstLetter
         default:
             return "requests.return_to_computer".localized.capitalizedFirstLetter
-
         }
     }
-
 }

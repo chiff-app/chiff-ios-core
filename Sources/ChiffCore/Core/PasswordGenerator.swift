@@ -17,6 +17,28 @@ public enum PasswordGenerationError: Error {
     case ppdInconsistency
 }
 
+extension PasswordGenerationError: LocalizedError {
+    public var errorDescription: String? {
+        return "errors.password_generation".localized
+//        switch self {
+//        case .characterNotAllowed:
+//            return "" // TODO: ADD DESCRIPRION
+//        case .tooShort:
+//            return "" // TODO: ADD DESCRIPRION
+//        case .tooLong:
+//            return "" // TODO: ADD DESCRIPRION
+//        case .keyGeneration:
+//            return "" // TODO: ADD DESCRIPRION
+//        case .invalidPassword:
+//            return "" // TODO: ADD DESCRIPRION
+//        case .ppdInconsistency:
+//            return "" // TODO: ADD DESCRIPRION
+//        default:
+//            return "errors.password_generation".localized
+//        }
+    }
+}
+
 /// Deterministically passwords with or without a PPD.
 public class PasswordGenerator {
 

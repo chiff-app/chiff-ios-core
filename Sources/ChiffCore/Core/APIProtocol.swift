@@ -22,6 +22,19 @@ public enum APIError: Error {
     case urlSize
 }
 
+extension APIError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .statusCode(409):
+            return "errors.organisation_exists".localized
+        case .statusCode(402):
+            return "errors.payment_required".localized
+        default:
+            return "\("errors.api_error".localized): \(self)"
+        }
+    }
+}
+
 public enum APIMethod: String {
     case get = "GET"
     case put = "PUT"

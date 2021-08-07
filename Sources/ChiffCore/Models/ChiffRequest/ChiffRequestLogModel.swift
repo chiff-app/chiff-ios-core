@@ -13,7 +13,7 @@ public struct ChiffRequestLogModel: Codable {
     public let type: ChiffMessageType
     public let browserTab: Int
     public var isRejected: Bool
-    private let date: Date
+    public let date: Date
 
     public var logString: String {
         return  "\(dateString) \(accountString) \(isRejected ? "(declined)" : "")"

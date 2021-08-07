@@ -41,7 +41,7 @@ public class ChiffRequestsLogStorage: NSObject {
         }
     }
     
-    public func removeLogsForSession(id: String) {
+    public func removeLogsFileForSession(id: String) {
         let fileManager = FileManager.default
         let logFilePath = ChiffRequestsLogStorage.getPath(id)
         do {

@@ -16,7 +16,7 @@ public struct ChiffRequestLogModel: Codable {
     public let date: Date
 
     public var logString: String {
-        return  "\(dateString) \(accountString) \(isRejected ? "(declined)" : "")"
+        return  "\(dateString)\t\(accountString) \(isRejected ? "(declined)" : "")"
     }
     
     private var dateString: String {

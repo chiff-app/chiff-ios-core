@@ -78,6 +78,7 @@ public struct BrowserSession: Session {
                 Logger.shared.analytics(.sessionDeleted)
                 try Keychain.shared.delete(id: SessionIdentifier.sharedKey.identifier(for: id), service: Self.encryptionService)
                 try Keychain.shared.delete(id: SessionIdentifier.signingKeyPair.identifier(for: id), service: Self.signingService)
+                ChiffRequestsLogStorage.sharedStorage.removeLogsFileForSession(id: id)
             } catch {
                 Logger.shared.error("Error deleting session", error: error)
             }

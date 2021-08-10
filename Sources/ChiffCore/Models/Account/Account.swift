@@ -29,28 +29,24 @@ public enum AccountError: Error {
 extension AccountError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .invalidURL:
-            return "" // TODO: ADD DESCRIPRION
         case .duplicateAccountId:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.duplicate_account_id".localized
         case .accountsNotLoaded:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.accounts_not_loaded".localized
         case .notFound:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.not_found".localized
         case .missingContext:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.missing_context".localized
         case .passwordGeneration:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.password_generation".localized
         case .tokenRetrieval:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.token_retrieval".localized
         case .wrongRpId:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.wrong_rp_id".localized
         case .noWebAuthn:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.no_web_authn".localized
         case .webAuthnExists:
-            return "" // TODO: ADD DESCRIPRION
-        case .notTOTP:
-            return "" // TODO: ADD DESCRIPRION
+            return "errors.account.web_authn_exists".localized
         case .importError(failed: let failed, total: let total):
             return String(format: "errors.failed_accounts_message".localized, failed, total)
         }

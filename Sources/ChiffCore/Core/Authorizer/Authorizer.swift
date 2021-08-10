@@ -24,15 +24,21 @@ extension AuthorizationError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .cannotChangeAccount:
-            return "errors.shared_account_change".localized
+            return "errors.authorization.shared_account_change".localized
         case .noTeamSessionFound:
-            return "errors.no_team".localized
+            return "errors.authorization.no_team".localized
         case .notAdmin:
-            return "errors.no_admin".localized
+            return "errors.authorization.no_admin".localized
         case .multipleAdminSessionsFound(count: let count):
-            return String(format: "errors.multiple_admins".localized, count)
-        case .inProgress, .missingData, .unknownType:
-            return "" // TODO: NEED TO ADD DESCRIPTION
+            return String(format: "errors.authorization.multiple_admins".localized, count)
+        case .inProgress:
+            return "errors.authorization.in_progress".
+        case .missingData:
+            return "errors.authorization.missing_data".
+        case .unknownType:
+            return "errors.authorization.unknown_type".
+        default:
+            return "errors.authorization.default".localized
         }
     }
 }

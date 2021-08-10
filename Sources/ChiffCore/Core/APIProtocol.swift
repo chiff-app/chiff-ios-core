@@ -26,11 +26,13 @@ extension APIError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .statusCode(409):
-            return "errors.organisation_exists".localized
+            return "errors.api.organisation_exists".localized
         case .statusCode(402):
-            return "errors.payment_required".localized
+            return "errors.api.payment_required".localized
+        case .statusCode(let statusCode):
+            "\("errors.api.generic".localized): \(statusCode)"
         default:
-            return "\("errors.api_error".localized): \(self)"
+            return "\("errors.api.generic".localized): \(self)"
         }
     }
 }

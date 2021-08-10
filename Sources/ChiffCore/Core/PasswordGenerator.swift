@@ -19,23 +19,22 @@ public enum PasswordGenerationError: Error {
 
 extension PasswordGenerationError: LocalizedError {
     public var errorDescription: String? {
-        return "errors.password_generation".localized
-//        switch self {
-//        case .characterNotAllowed:
-//            return "" // TODO: ADD DESCRIPRION
-//        case .tooShort:
-//            return "" // TODO: ADD DESCRIPRION
-//        case .tooLong:
-//            return "" // TODO: ADD DESCRIPRION
-//        case .keyGeneration:
-//            return "" // TODO: ADD DESCRIPRION
-//        case .invalidPassword:
-//            return "" // TODO: ADD DESCRIPRION
-//        case .ppdInconsistency:
-//            return "" // TODO: ADD DESCRIPRION
-//        default:
-//            return "errors.password_generation".localized
-//        }
+        switch self {
+        case .characterNotAllowed:
+            return "errors.password_generation.character_not_allowed".localized
+        case .tooShort:
+            return "errors.password_generation.too_short".localized
+        case .tooLong:
+            return "errors.password_generation.too_long".localized
+        case .keyGeneration:
+            return "errors.password_generation.key_generation".localized
+        case .invalidPassword:
+            return "errors.password_generation.invalid_password".localized
+        case .ppdInconsistency:
+            return "errors.password_generation.ppd_inconsistency".localized
+        default:
+            return "errors.password_generation.generic".localized
+        }
     }
 }
 

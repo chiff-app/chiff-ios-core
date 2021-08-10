@@ -79,6 +79,51 @@ date_components:
     singular_unit:
       value: year
 errors:
+  account:
+    accounts_not_loaded:
+      value: The accounts have not been loaded yet.
+    duplicate_account_id:
+      value: The account already exists.
+    missing_context:
+      value: The authentication context is missing.
+    no_webauthn:
+      value: WebAuthn is not enabled for this account.
+    not_found:
+      value: The account was not found.
+    password_generation:
+      value: Failed to generate a password.
+    token_retrieval:
+      value: The one-time password token could not be retrieved.
+    webauthn_exists:
+      value: WebAuthn is already enabled for this account.
+    wrong_rp_id:
+      value: The WebAuthn domain is not correct.
+  api:
+    generic:
+      value: A network error occurred
+    organisation_exists:
+      value: >-
+        The team already exists. Please contact help@chiff.app if you don't have
+        access to the team.
+    payment_required:
+      value: The payment has not been successful. Please contact help@chiff.app.
+  authorization:
+    default:
+      value: An unknown authorization error occurred.
+    in_progress:
+      value: Authorization is already in progress.
+    missing_data:
+      value: Some data is missing.
+    multiple_admins:
+      value: You are admin of %d teams. This is not supported yet.
+    no_admin:
+      value: You are not the team admin.
+    no_team:
+      value: You are not part of a team.
+    shared_account_change:
+      value: Cannot change password for a shared account.
+    unknown_type:
+      value: Unknown type.
   local_authentication:
     biometry_not_available:
       value: >-
@@ -127,6 +172,25 @@ logs:
     value: Unknown request
   update_account:
     value: Account for %@ updated
+  organisation_exists:
+    value: >-
+      The team already exists. Please contact help@chiff.app if you don't have
+      access to the team.
+  password_generation:
+    character_not_allowed:
+      value: The password contains a character that is not allowed.
+    generic:
+      value: Failed to generate a password.
+    invalid_password:
+      value: The password is invalid.
+    key_generation:
+      value: An error occurred with generating the key.
+    ppd_inconsistency:
+      value: The password policy description contains an error.
+    too_long:
+      value: The password is too long.
+    too_short:
+      value: The password is too short.
 requests:
   account_added:
     value: Account added

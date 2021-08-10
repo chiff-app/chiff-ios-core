@@ -79,6 +79,53 @@ date_components:
     singular_unit:
       value: jaar
 errors:
+  account:
+    accounts_not_loaded:
+      value: De accounts zijn nog niet geladen.
+    duplicate_account_id:
+      value: Het account bestaat al.
+    missing_context:
+      value: De authenticatiecontext ontbreekt.
+    no_webauthn:
+      value: WebAuthn is niet ingeschakeld voor dit account.
+    not_found:
+      value: Het account is niet gevonden.
+    password_generation:
+      value: Wachtwoord genereren mislukt.
+    token_retrieval:
+      value: De one-time password token kan niet worden opgehaald.
+    webauthn_exists:
+      value: WebAuthn is al ingeschakeld voor dit account.
+    wrong_rp_id:
+      value: Het WebAuthn-domein is niet correct.
+  api:
+    generic:
+      value: Er is een netwerkfout opgetreden
+    organisation_exists:
+      value: >-
+        Het team bestaat al. Neem contact op met help@chiff.app als je geen
+        toegang hebt tot het team.
+    payment_required:
+      value: De betaling is niet gelukt. Neem contact op met help@chiff.app.
+  authorization:
+    default:
+      value: Er is een onbekende autorisatiefout opgetreden.
+    in_progress:
+      value: Er is al een autorisatie bezig.
+    missing_data:
+      value: Sommige gegevens ontbreken.
+    multiple_admins:
+      value: >-
+        Je bent beheerder van %d teams. Deze functionaliteit wordt nog niet
+        ondersteund.
+    no_admin:
+      value: Je bent geen beheerder van dit team.
+    no_team:
+      value: Je bent geen onderdeel van een team.
+    shared_account_change:
+      value: Het wachtwoord van een gedeeld account kan niet gewijzigd worden.
+    unknown_type:
+      value: Onbekend type.
   local_authentication:
     biometry_not_available:
       value: >-
@@ -127,6 +174,25 @@ logs:
     value: Onbekende actie
   update_account:
     value: Account voor %@ geüpdatet
+  organisation_exists:
+    value: >-
+      Het team bestaat al. Neem contact op met help@chiff.app als je geen
+      toegang hebt tot het team.
+  password_generation:
+    character_not_allowed:
+      value: Het wachtwoord bevat een teken dat niet is toegestaan.
+    generic:
+      value: Wachtwoord genereren mislukt.
+    invalid_password:
+      value: Het wachtwoord is ongeldig.
+    key_generation:
+      value: Er is een fout opgetreden bij het genereren van de sleutel.
+    ppd_inconsistency:
+      value: De 'password policy description' bevat een fout.
+    too_long:
+      value: Het wachtwoord is te lang.
+    too_short:
+      value: Het wachtwoord is te kort.
 requests:
   account_added:
     value: Account toegevoegd

@@ -81,7 +81,6 @@ public class LoginAuthorizer: Authorizer {
             success = true
             return account
         }.ensure {
-            AuthorizationGuard.shared.authorizationInProgress = false
             self.writeLog(isRejected: false)
             switch self.type {
             case .login:

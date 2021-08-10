@@ -84,12 +84,16 @@ errors:
       value: De accounts zijn nog niet geladen.
     duplicate_account_id:
       value: Het account bestaat al.
+    invalid_url:
+      value: De URL is ongeldig.
     missing_context:
       value: De authenticatiecontext ontbreekt.
     no_webauthn:
       value: WebAuthn is niet ingeschakeld voor dit account.
     not_found:
       value: Het account is niet gevonden.
+    not_totp:
+      value: Dit account heeft geen time-based one-time password.
     password_generation:
       value: Wachtwoord genereren mislukt.
     token_retrieval:
@@ -141,10 +145,6 @@ errors:
       value: >-
         Authenticatie kan niet gestart worden, omdat de toegangscode niet is
         ingesteld op de telefoon.
-  organisation_exists:
-    value: >-
-      Het team bestaat al. Neem contact op met help@chiff.app als je geen
-      toegang hebt tot het team.
   password_generation:
     character_not_allowed:
       value: Het wachtwoord bevat een teken dat niet is toegestaan.
@@ -160,6 +160,39 @@ errors:
       value: Het wachtwoord is te lang.
     too_short:
       value: Het wachtwoord is te kort.
+logs:
+  add:
+    value: Account gemaakt voor %@
+  add_bulk:
+    value: '%@ accounts geïmporteerd'
+  add_to_existing:
+    value: URL toegevoegd aan %@
+  add_webauthn:
+    value: WebAuthn toegevoegd aan %@
+  bulk_login:
+    value: Ingelogd bij %@ accounts
+  change:
+    value: Wachtwoord gewijzigd @ %@
+  fill:
+    value: Wachtwoord opgehaald voor %@
+  get_details:
+    value: Account voor %@ opgehaald
+  login:
+    value: Ingelogd bij %@
+  register:
+    value: Account gemaakt voor %@
+  ssh_created:
+    value: 'Nieuwe SSH sleutel gemaakt: %@'
+  ssh_login:
+    value: Ingelogd via SSH met %@
+  team_created:
+    value: Team %@ gemaakt
+  team_login:
+    value: Ingelogd bij team %@
+  unknown:
+    value: Onbekende actie
+  update_account:
+    value: Account voor %@ geüpdatet
 requests:
   account_added:
     value: Account toegevoegd

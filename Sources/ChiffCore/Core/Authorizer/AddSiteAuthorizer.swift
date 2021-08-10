@@ -19,6 +19,10 @@ public class AddSiteAuthorizer: Authorizer {
     let password: String
     let notes: String?
     let askToChange: Bool?
+    
+    public var logParam: String {
+        return siteName
+    }
 
     public let requestText = "requests.add_account".localized.capitalizedFirstLetter
     public let successText = "requests.account_added".localized.capitalizedFirstLetter
@@ -65,6 +69,7 @@ public class AddSiteAuthorizer: Authorizer {
             success = true
             return nil
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.addSiteRequestAuthorized, properties: [.value: success])
         }
     }

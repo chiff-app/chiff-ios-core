@@ -49,6 +49,10 @@ extension AccountError: LocalizedError {
             return "errors.account.web_authn_exists".localized
         case .importError(failed: let failed, total: let total):
             return String(format: "errors.failed_accounts_message".localized, failed, total)
+        case .notTOTP:
+            return "errors.account.not_totp".localized
+        case .invalidURL:
+            return "error.account.invalid_url".localized
         }
     }
 }

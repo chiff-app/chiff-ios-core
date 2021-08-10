@@ -14,6 +14,9 @@ public class SSHCreateAuthorizer: Authorizer {
     public let browserTab: Int
     let name: String
     let algorithm: SSHAlgorithm
+    public var logParam: String {
+        return name
+    }
 
     public let requestText = "requests.create_ssh_key".localized.capitalizedFirstLetter
     public let successText = "requests.ssh_key_created".localized.capitalizedFirstLetter
@@ -54,7 +57,8 @@ public class SSHCreateAuthorizer: Authorizer {
             success = true
             return nil
         }.ensure {
-             Logger.shared.analytics(.createSSHKeyRequestAuthorized, properties: [.value: success])
+            self.writeLog(isRejected: false)
+            Logger.shared.analytics(.createSSHKeyRequestAuthorized, properties: [.value: success])
         }
     }
 

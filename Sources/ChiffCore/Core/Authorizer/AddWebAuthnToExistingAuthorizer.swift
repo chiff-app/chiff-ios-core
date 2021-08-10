@@ -21,6 +21,9 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
     let accountId: String
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
+    public var logParam: String {
+        return siteName
+    }
 
     public let requestText = "requests.update_account".localized.capitalizedFirstLetter
     public let successText = "requests.account_updated".localized.capitalizedFirstLetter
@@ -74,6 +77,7 @@ public class AddWebAuthnToExistingAuthorizer: Authorizer {
             success = true
             return nil
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.webAuthnCreateRequestAuthorized, properties: [.value: success])
         }
     }

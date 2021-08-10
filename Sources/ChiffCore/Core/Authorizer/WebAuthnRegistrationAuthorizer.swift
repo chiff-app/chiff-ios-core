@@ -22,6 +22,9 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
     let clientDataHash: String?
     let extensions: WebAuthnExtensions?
     let accountExists: Bool
+    public var logParam: String {
+        return siteName
+    }
 
     public let requestText = "requests.add_account".localized.capitalizedFirstLetter
     public let successText = "requests.account_added".localized.capitalizedFirstLetter
@@ -83,6 +86,7 @@ public class WebAuthnRegistrationAuthorizer: Authorizer {
             success = true
             return nil
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.webAuthnCreateRequestAuthorized, properties: [.value: success])
         }
     }

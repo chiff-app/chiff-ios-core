@@ -19,6 +19,9 @@ public class UpdateAccountAuthorizer: Authorizer {
     let password: String?
     let newSiteName: String?
     let notes: String?
+    public var logParam: String {
+        return siteName
+    }
 
     public let requestText = "requests.update_account".localized.capitalizedFirstLetter
     public let successText = "requests.account_updated".localized.capitalizedFirstLetter
@@ -66,6 +69,7 @@ public class UpdateAccountAuthorizer: Authorizer {
             success = true
             return account
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.updateAccountRequestAuthorized, properties: [.value: success])
         }
     }

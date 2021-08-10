@@ -84,12 +84,16 @@ errors:
       value: The accounts have not been loaded yet.
     duplicate_account_id:
       value: The account already exists.
+    invalid_url:
+      value: The URL is invalid.
     missing_context:
       value: The authentication context is missing.
     no_webauthn:
       value: WebAuthn is not enabled for this account.
     not_found:
       value: The account was not found.
+    not_totp:
+      value: This account does not have a time-based one-time password.
     password_generation:
       value: Failed to generate a password.
     token_retrieval:
@@ -139,10 +143,6 @@ errors:
       value: >-
         Authentication could not start, because passcode is not set on the
         device.
-  organisation_exists:
-    value: >-
-      The team already exists. Please contact help@chiff.app if you don't have
-      access to the team.
   password_generation:
     character_not_allowed:
       value: The password contains a character that is not allowed.
@@ -158,6 +158,39 @@ errors:
       value: The password is too long.
     too_short:
       value: The password is too short.
+logs:
+  add:
+    value: Account created for %@
+  add_bulk:
+    value: '%@ accounts imported'
+  add_to_existing:
+    value: URL added to %@
+  add_webauthn:
+    value: WebAuthn added to %@
+  bulk_login:
+    value: Logged in to %@ accounts
+  change:
+    value: Password changed @ %@
+  fill:
+    value: Password retrieved for %@
+  get_details:
+    value: Account for %@ retrieved
+  login:
+    value: Logged in @ %@
+  register:
+    value: Account created for %@
+  ssh_created:
+    value: 'New SSH key created: %@'
+  ssh_login:
+    value: Logged in to SSH with %@
+  team_created:
+    value: Team %@ created
+  team_login:
+    value: Logged in to team %@
+  unknown:
+    value: Unknown request
+  update_account:
+    value: Account for %@ updated
 requests:
   account_added:
     value: Account added

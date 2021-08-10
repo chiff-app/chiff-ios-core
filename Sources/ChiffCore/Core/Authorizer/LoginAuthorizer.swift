@@ -16,6 +16,9 @@ public class LoginAuthorizer: Authorizer {
     let accountId: String
     let siteURL: String?
     let siteId: String?
+    public var logParam: String {
+        return siteName
+    }
 
     public var successText: String {
         switch type {
@@ -78,6 +81,7 @@ public class LoginAuthorizer: Authorizer {
             success = true
             return account
         }.ensure {
+            self.writeLog(isRejected: false)
             switch self.type {
             case .login:
                 Logger.shared.analytics(.loginRequestAuthorized, properties: [.value: success])

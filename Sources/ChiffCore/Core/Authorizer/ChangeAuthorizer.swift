@@ -16,6 +16,9 @@ public class ChangeAuthorizer: Authorizer {
     let siteURL: String
     let siteId: String
     let accountId: String
+    public var logParam: String {
+        return siteName
+    }
 
     public let requestText = "requests.change_password".localized.capitalizedFirstLetter
     public let successText = "requests.new_password_generated".localized.capitalizedFirstLetter
@@ -60,6 +63,7 @@ public class ChangeAuthorizer: Authorizer {
             NotificationCenter.default.postMain(name: .passwordChangeConfirmation, object: self.session, userInfo: ["context": context as Any])
             return account
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.changePasswordRequestAuthorized, properties: [.value: success])
         }
     }

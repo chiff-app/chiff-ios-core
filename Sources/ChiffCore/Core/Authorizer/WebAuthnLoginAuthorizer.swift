@@ -16,6 +16,9 @@ public class WebAuthnLoginAuthorizer: Authorizer {
     let relyingPartyId: String
     let accountId: String
     let challenge: String
+    public var logParam: String {
+        return siteName
+    }
 
     public let requestText = "requests.confirm_login".localized.capitalizedFirstLetter
     public let successText = "requests.login_succesful".localized.capitalizedFirstLetter
@@ -57,6 +60,7 @@ public class WebAuthnLoginAuthorizer: Authorizer {
             success = true
             return nil
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.loginRequestAuthorized, properties: [.value: success])
         }
     }

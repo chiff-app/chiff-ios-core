@@ -19,6 +19,7 @@ public class TeamAdminLoginAuthorizer: Authorizer {
         return String(format: "requests.login_to".localized, "requests.chiff_for_teams".localized)
     }
     public var teamSession: TeamSession?
+    public var logParam: String = ""
 
     public required init(request: ChiffRequest, session: BrowserSession) throws {
         self.session = session
@@ -33,6 +34,7 @@ public class TeamAdminLoginAuthorizer: Authorizer {
         guard let teamSession = teamSession else {
             return Promise(error: AuthorizationError.notAdmin)
         }
+        self.logParam = teamSession.title
         return firstly {
             LocalAuthenticationManager.shared.authenticate(reason: self.authenticationReason, withMainContext: false)
         }.then { context -> Promise<(Data, LAContext?)> in
@@ -41,6 +43,7 @@ public class TeamAdminLoginAuthorizer: Authorizer {
         }.then { seed, context  in
             self.session.sendTeamSeed(id: teamSession.id, teamId: teamSession.teamId, seed: seed.base64, browserTab: self.browserTab, context: context!, organisationKey: nil).map { nil }
         }.ensure {
+            self.writeLog(isRejected: false)
             Logger.shared.analytics(.adminLoginRequestAuthorized)
         }.log("Error getting admin seed")
     }

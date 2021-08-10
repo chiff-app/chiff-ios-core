@@ -30,7 +30,7 @@ extension APIError: LocalizedError {
         case .statusCode(402):
             return "errors.api.payment_required".localized
         case .statusCode(let statusCode):
-            "\("errors.api.generic".localized): \(statusCode)"
+            return "\("errors.api.generic".localized): \(statusCode)"
         default:
             return "\("errors.api.generic".localized): \(self)"
         }

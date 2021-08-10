@@ -84,12 +84,16 @@ errors:
       value: The accounts have not been loaded yet.
     duplicate_account_id:
       value: The account already exists.
+    invalid_url:
+      value: The URL is invalid.
     missing_context:
       value: The authentication context is missing.
     no_webauthn:
       value: WebAuthn is not enabled for this account.
     not_found:
       value: The account was not found.
+    not_totp:
+      value: This account does not have a time-based one-time password.
     password_generation:
       value: Failed to generate a password.
     token_retrieval:
@@ -139,6 +143,21 @@ errors:
       value: >-
         Authentication could not start, because passcode is not set on the
         device.
+  password_generation:
+    character_not_allowed:
+      value: The password contains a character that is not allowed.
+    generic:
+      value: Failed to generate a password.
+    invalid_password:
+      value: The password is invalid.
+    key_generation:
+      value: An error occurred with generating the key.
+    ppd_inconsistency:
+      value: The password policy description contains an error.
+    too_long:
+      value: The password is too long.
+    too_short:
+      value: The password is too short.
 logs:
   add:
     value: Account created for %@
@@ -172,25 +191,6 @@ logs:
     value: Unknown request
   update_account:
     value: Account for %@ updated
-  organisation_exists:
-    value: >-
-      The team already exists. Please contact help@chiff.app if you don't have
-      access to the team.
-  password_generation:
-    character_not_allowed:
-      value: The password contains a character that is not allowed.
-    generic:
-      value: Failed to generate a password.
-    invalid_password:
-      value: The password is invalid.
-    key_generation:
-      value: An error occurred with generating the key.
-    ppd_inconsistency:
-      value: The password policy description contains an error.
-    too_long:
-      value: The password is too long.
-    too_short:
-      value: The password is too short.
 requests:
   account_added:
     value: Account added

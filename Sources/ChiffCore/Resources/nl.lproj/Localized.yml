@@ -84,12 +84,16 @@ errors:
       value: De accounts zijn nog niet geladen.
     duplicate_account_id:
       value: Het account bestaat al.
+    invalid_url:
+      value: De URL is ongeldig.
     missing_context:
       value: De authenticatiecontext ontbreekt.
     no_webauthn:
       value: WebAuthn is niet ingeschakeld voor dit account.
     not_found:
       value: Het account is niet gevonden.
+    not_totp:
+      value: Dit account heeft geen time-based one-time password.
     password_generation:
       value: Wachtwoord genereren mislukt.
     token_retrieval:
@@ -141,6 +145,21 @@ errors:
       value: >-
         Authenticatie kan niet gestart worden, omdat de toegangscode niet is
         ingesteld op de telefoon.
+  password_generation:
+    character_not_allowed:
+      value: Het wachtwoord bevat een teken dat niet is toegestaan.
+    generic:
+      value: Wachtwoord genereren mislukt.
+    invalid_password:
+      value: Het wachtwoord is ongeldig.
+    key_generation:
+      value: Er is een fout opgetreden bij het genereren van de sleutel.
+    ppd_inconsistency:
+      value: De 'password policy description' bevat een fout.
+    too_long:
+      value: Het wachtwoord is te lang.
+    too_short:
+      value: Het wachtwoord is te kort.
 logs:
   add:
     value: Account gemaakt voor %@
@@ -174,25 +193,6 @@ logs:
     value: Onbekende actie
   update_account:
     value: Account voor %@ geüpdatet
-  organisation_exists:
-    value: >-
-      Het team bestaat al. Neem contact op met help@chiff.app als je geen
-      toegang hebt tot het team.
-  password_generation:
-    character_not_allowed:
-      value: Het wachtwoord bevat een teken dat niet is toegestaan.
-    generic:
-      value: Wachtwoord genereren mislukt.
-    invalid_password:
-      value: Het wachtwoord is ongeldig.
-    key_generation:
-      value: Er is een fout opgetreden bij het genereren van de sleutel.
-    ppd_inconsistency:
-      value: De 'password policy description' bevat een fout.
-    too_long:
-      value: Het wachtwoord is te lang.
-    too_short:
-      value: Het wachtwoord is te kort.
 requests:
   account_added:
     value: Account toegevoegd

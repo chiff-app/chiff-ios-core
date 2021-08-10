@@ -32,13 +32,11 @@ extension AuthorizationError: LocalizedError {
         case .multipleAdminSessionsFound(count: let count):
             return String(format: "errors.authorization.multiple_admins".localized, count)
         case .inProgress:
-            return "errors.authorization.in_progress".
+            return "errors.authorization.in_progress".localized
         case .missingData:
-            return "errors.authorization.missing_data".
+            return "errors.authorization.missing_data".localized
         case .unknownType:
-            return "errors.authorization.unknown_type".
-        default:
-            return "errors.authorization.default".localized
+            return "errors.authorization.unknown_type".localized
         }
     }
 }

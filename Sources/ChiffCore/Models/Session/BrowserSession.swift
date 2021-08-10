@@ -41,7 +41,6 @@ public struct BrowserSession: Session {
         return NSImage(named: browser.rawValue)
     }
     #endif
-    public var lastRequest: Date?
 
     public static var signingService: KeychainService = .browserSession(attribute: .signing)
     public static var encryptionService: KeychainService = .browserSession(attribute: .shared)
@@ -123,7 +122,7 @@ public struct BrowserSession: Session {
     ///   - type: The response type
     ///   - context: The LocalAuthenticationContext. This should already be authenticated, otherwise this function will fail
     ///   - newPassword: Optionally, the new password in case of a change response.
-    mutating func sendCredentials(account: Account, browserTab: Int, type: ChiffMessageType, context: LAContext, newPassword: String?) throws {
+    func sendCredentials(account: Account, browserTab: Int, type: ChiffMessageType, context: LAContext, newPassword: String?) throws {
         var response: KeynCredentialsResponse = KeynCredentialsResponse(type: type, browserTab: browserTab)
         switch type {
         case .getDetails:
@@ -152,7 +151,6 @@ public struct BrowserSession: Session {
         let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
 
         try self.sendToVolatileQueue(ciphertext: ciphertext).catchLog("Error sending credentials")
-        try updateLastRequest()
     }
 
     /// Respond the a request to add multiple acounts. Simply acknowledges that the request is received
@@ -160,11 +158,10 @@ public struct BrowserSession: Session {
     ///   - browserTab: The browser tab in the client.
     ///   - context: Optionally, an authenticated `LAContext` object.
     /// - Throws: Encoding, encryption or network errors.
-    mutating func sendBulkAddResponse(browserTab: Int, context: LAContext?) throws {
+    func sendBulkAddResponse(browserTab: Int, context: LAContext?) throws {
         let message = try JSONEncoder().encode(KeynCredentialsResponse(type: .addBulk, browserTab: browserTab))
         let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
         try self.sendToVolatileQueue(ciphertext: ciphertext).catchLog("Error sending bulk credentials")
-        try updateLastRequest()
     }
 
     /// Respond to a request to log into multiple tabs.
@@ -173,11 +170,10 @@ public struct BrowserSession: Session {
     ///   - accounts: A dictionary of account, where the key is the browser tab.
     ///   - context: Optionally, an authenticated `LAContext` object.
     /// - Throws: Encoding, encryption or network errors.
-    mutating func sendBulkLoginResponse(browserTab: Int, accounts: [Int: BulkLoginAccount?], context: LAContext?) throws {
+    func sendBulkLoginResponse(browserTab: Int, accounts: [Int: BulkLoginAccount?], context: LAContext?) throws {
         let message = try JSONEncoder().encode(KeynCredentialsResponse(type: .bulkLogin, browserTab: browserTab, accounts: accounts))
         let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
         try self.sendToVolatileQueue(ciphertext: ciphertext).catchLog("Error sending bulk credentials")
-        try updateLastRequest()
     }
 
     /// Send the team seed to the client.
@@ -188,7 +184,7 @@ public struct BrowserSession: Session {
     ///   - browserTab: The browserTab
     ///   - context: Optionally, an authenticated `LAContext` object.
     ///   - organisationKey: The organisation key, used to retrieve organisation PPDs.
-    public mutating func sendTeamSeed(id: String, teamId: String, seed: String, browserTab: Int, context: LAContext, organisationKey: String?) -> Promise<Void> {
+    public func sendTeamSeed(id: String, teamId: String, seed: String, browserTab: Int, context: LAContext, organisationKey: String?) -> Promise<Void> {
         do {
             let message = try JSONEncoder().encode(KeynCredentialsResponse(type: .createOrganisation,
                                                                            browserTab: browserTab,
@@ -197,7 +193,6 @@ public struct BrowserSession: Session {
                                                                            otp: organisationKey,
                                                                            teamId: teamId))
             let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
-            try self.updateLastRequest()
             return try self.sendToVolatileQueue(ciphertext: ciphertext).asVoid().log("Error sending credentials")
         } catch {
             return Promise(error: error)
@@ -213,7 +208,7 @@ public struct BrowserSession: Session {
     ///   - signature: The signature, relevant.
     ///   - counter: The counter, if relevant.
     /// - Throws: Encoding, encryption or network errors.
-    mutating func sendWebAuthnResponse(account: UserAccount,
+    func sendWebAuthnResponse(account: UserAccount,
                                        browserTab: Int,
                                        type: ChiffMessageType,
                                        context: LAContext,
@@ -239,7 +234,6 @@ public struct BrowserSession: Session {
         let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
 
         try self.sendToVolatileQueue(ciphertext: ciphertext).catchLog("Error sending credentials")
-        try updateLastRequest()
     }
 
     /// Respond to a SSH request.
@@ -250,7 +244,7 @@ public struct BrowserSession: Session {
     ///   - context: Optionally, an authenticated `LAContext` object.
     ///   - signature: The signature, relevant.
     /// - Throws: Encoding, encryption or network errors.
-    mutating func sendSSHResponse(identity: SSHIdentity,
+    func sendSSHResponse(identity: SSHIdentity,
                                        browserTab: Int,
                                        type: ChiffMessageType,
                                        context: LAContext,
@@ -269,7 +263,6 @@ public struct BrowserSession: Session {
         let ciphertext = try Crypto.shared.encrypt(message, key: self.sharedKey())
 
         try self.sendToVolatileQueue(ciphertext: ciphertext).catchLog("Error sending credentials")
-        try updateLastRequest()
     }
 
     /// Retrieve persistent queue messages.
@@ -353,11 +346,6 @@ public struct BrowserSession: Session {
         }
     }
 
-    private mutating func updateLastRequest() throws {
-        lastRequest = Date()
-        try update()
-        NotificationCenter.default.postMain(name: .sessionUpdated, object: nil, userInfo: ["session": self])
-    }
 }
 
 extension BrowserSession: Codable {
@@ -369,7 +357,6 @@ extension BrowserSession: Codable {
         case signingPubKey
         case version
         case title
-        case lastRequest
     }
 
     enum LegacyCodingKey: CodingKey {
@@ -383,7 +370,6 @@ extension BrowserSession: Codable {
         self.signingPubKey = try values.decode(String.self, forKey: .signingPubKey)
         self.creationDate = try values.decode(Date.self, forKey: .creationDate)
         self.version = try values.decodeIfPresent(Int.self, forKey: .version) ?? 0
-        self.lastRequest = try values.decodeIfPresent(Date.self, forKey: .lastRequest)
         do {
             let browser = try values.decode(Browser.self, forKey: .browser)
             self.browser = browser

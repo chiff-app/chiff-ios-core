@@ -51,6 +51,7 @@ public enum SSHAlgorithm: String, Codable, Equatable {
 
 /// An SSH identity.
 public struct SSHIdentity: Equatable, Codable, Identity {
+    
     public let id: String // SSH fingerprint, hex encoded
     public var name: String
     public var timesUsed: Int
@@ -70,7 +71,7 @@ public struct SSHIdentity: Equatable, Codable, Identity {
     }
 
     static let cryptoContext = "chiffssh"
-
+    private static var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
     /// Create a new SSH identity.
     /// - Parameters:
     ///   - algorithms: The algorithms should be provided in order of preference.
@@ -104,6 +105,19 @@ public struct SSHIdentity: Equatable, Codable, Identity {
         for session in try BrowserSession.all().filter({ $0.browser == .cli }) {
             _ = try session.updateSSHIdentity(identity: SSHSessionIdentity(identity: self))
         }
+    }
+    
+    //MARK - Account Tag Model
+    public var tags: [AccountTagModel] {
+        return Array(SSHIdentity.tagsSet)
+    }
+    
+    public func addTag(tag: AccountTagModel) {
+        SSHIdentity.tagsSet.insert(tag)
+    }
+    
+    public func remove(tag: AccountTagModel) {
+        SSHIdentity.tagsSet.remove(tag)
     }
 
     // Documentation in protocol

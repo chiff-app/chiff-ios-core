@@ -28,6 +28,7 @@ public struct UserAccount: Account, Equatable, Identity {
     public var lastTimeUsed: Date?
     public var lastChange: Timestamp
     public var shadowing: Bool = false // This is set when loading accounts if there exists a team account with the same ID.
+    private static var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
 
     public static let currentVersion = 1
     public static let keychainService: KeychainService = .account()
@@ -87,6 +88,19 @@ public struct UserAccount: Account, Equatable, Identity {
         self.lastChange = Date.now
         try save(password: generatedPassword, keyPair: keyPair, offline: offline)
     }
+    
+    //MARK - Account Tag Model
+    public var tags: [AccountTagModel] {
+        return Array(UserAccount.tagsSet)
+    }
+    
+    public func addTag(tag: AccountTagModel) {
+        UserAccount.tagsSet.insert(tag)
+    }
+    
+    public func remove(tag: AccountTagModel) {
+        UserAccount.tagsSet.remove(tag)
+    }
 
     /// Create a `UserAccount`, without saving to the Keychain or generating passwords.
     /// - Parameters:
@@ -116,6 +130,9 @@ public struct UserAccount: Account, Equatable, Identity {
         self.timesUsed = 0
         self.lastChange = Date.now
     }
+    
+    
+
 
     /// Generate a new password. Uses the PPD if present.
     /// - Note: Does not save the password yet. Only updated the `lastPasswordUpdateTryIndex`.

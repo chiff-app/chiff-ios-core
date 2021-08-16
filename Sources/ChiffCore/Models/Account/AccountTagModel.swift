@@ -64,8 +64,8 @@ extension AccountTagModel: Codable {
         case color
     }
     
-    public init(title: String, color: AccountTagModel.Color, id: String) {
-        self.id = id
+    public init(title: String, color: AccountTagModel.Color) {
+        self.id = UUID().uuidString
         self.title = title
         self.color = color
     }
@@ -76,4 +76,11 @@ extension AccountTagModel: Codable {
         self.title = try values.decode(String.self, forKey: .title)
         self.color = try values.decode(AccountTagModel.Color.self, forKey: .color)
     }
+    
+    //STUB ONLY
+    public static var list: [AccountTagModel] {
+        return [AccountTagModel(id: UUID().uuidString, title: "red", color: .red), AccountTagModel(title: "orange", color: .orange), AccountTagModel(title: "yellow", color: .yellow), AccountTagModel(title: "green", color: .green), AccountTagModel(title: "blue", color: .blue), AccountTagModel(title: "indigo", color: .indigo), AccountTagModel(title: "violet", color: .violet)]
+    }
 }
+
+

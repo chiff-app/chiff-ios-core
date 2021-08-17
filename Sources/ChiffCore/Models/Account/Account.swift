@@ -67,6 +67,12 @@ public protocol Identity: Codable {
     var timesUsed: Int { get set }
     /// Last time this identity has been used
     var lastTimeUsed: Date? { get set }
+    
+    var tags: [AccountTagModel] { get }
+    
+    mutating func addTag(tag: AccountTagModel)
+    
+    mutating func remove(tag: AccountTagModel)
 
     /// Delete this account.
     func delete() -> Promise<Void>

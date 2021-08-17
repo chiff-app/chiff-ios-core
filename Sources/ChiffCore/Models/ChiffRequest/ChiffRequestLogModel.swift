@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ChiffRequestLogModel.swift
 //
 //
 //  Created by Dmitriy Starodubtsev on 27.07.2021.

@@ -71,7 +71,7 @@ public struct SSHIdentity: Equatable, Codable, Identity {
     }
 
     static let cryptoContext = "chiffssh"
-    private static var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
+    private var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
     /// Create a new SSH identity.
     /// - Parameters:
     ///   - algorithms: The algorithms should be provided in order of preference.
@@ -109,15 +109,15 @@ public struct SSHIdentity: Equatable, Codable, Identity {
     
     //MARK - Account Tag Model
     public var tags: [AccountTagModel] {
-        return Array(SSHIdentity.tagsSet)
+        return Array(self.tagsSet)
     }
     
-    public func addTag(tag: AccountTagModel) {
-        SSHIdentity.tagsSet.insert(tag)
+    public mutating func addTag(tag: AccountTagModel) {
+        self.tagsSet.insert(tag)
     }
     
-    public func remove(tag: AccountTagModel) {
-        SSHIdentity.tagsSet.remove(tag)
+    public mutating func remove(tag: AccountTagModel) {
+        self.tagsSet.remove(tag)
     }
 
     // Documentation in protocol

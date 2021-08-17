@@ -70,9 +70,9 @@ public protocol Identity: Codable {
     
     var tags: [AccountTagModel] { get }
     
-    func addTag(tag: AccountTagModel)
+    mutating func addTag(tag: AccountTagModel)
     
-    func remove(tag: AccountTagModel)
+    mutating func remove(tag: AccountTagModel)
 
     /// Delete this account.
     func delete() -> Promise<Void>

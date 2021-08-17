@@ -79,7 +79,7 @@ extension AccountTagModel: Codable {
     
     //STUB ONLY
     public static var list: [AccountTagModel] {
-        return [AccountTagModel(id: UUID().uuidString, title: "red", color: .red), AccountTagModel(title: "orange", color: .orange), AccountTagModel(title: "yellow", color: .yellow), AccountTagModel(title: "green", color: .green), AccountTagModel(title: "blue", color: .blue), AccountTagModel(title: "indigo", color: .indigo), AccountTagModel(title: "violet", color: .violet)]
+        return [AccountTagModel(title: "red", color: .red), AccountTagModel(title: "orange", color: .orange), AccountTagModel(title: "yellow", color: .yellow), AccountTagModel(title: "green", color: .green), AccountTagModel(title: "blue", color: .blue), AccountTagModel(title: "indigo", color: .indigo), AccountTagModel(title: "violet", color: .violet)]
     }
 }
 

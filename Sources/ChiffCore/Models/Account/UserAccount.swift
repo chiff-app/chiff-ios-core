@@ -28,13 +28,14 @@ public struct UserAccount: Account, Equatable, Identity {
     public var lastTimeUsed: Date?
     public var lastChange: Timestamp
     public var shadowing: Bool = false // This is set when loading accounts if there exists a team account with the same ID.
-    private static var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
+    private var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
 
     public static let currentVersion = 1
     public static let keychainService: KeychainService = .account()
     public static let otpService: KeychainService = .account(attribute: .otp)
     public static let notesService: KeychainService = .account(attribute: .notes)
     public static let webAuthnService: KeychainService = .account(attribute: .webauthn)
+    
 
     /// Create a `UserAccount`. This generates passwords or offset and saves the account to the Keychain as well.
     /// - Parameters:
@@ -91,15 +92,15 @@ public struct UserAccount: Account, Equatable, Identity {
     
     //MARK - Account Tag Model
     public var tags: [AccountTagModel] {
-        return Array(UserAccount.tagsSet)
+        return Array(self.tagsSet)
     }
     
-    public func addTag(tag: AccountTagModel) {
-        UserAccount.tagsSet.insert(tag)
+    public mutating func addTag(tag: AccountTagModel) {
+        self.tagsSet.insert(tag)
     }
     
-    public func remove(tag: AccountTagModel) {
-        UserAccount.tagsSet.remove(tag)
+    public mutating func remove(tag: AccountTagModel) {
+        self.tagsSet.remove(tag)
     }
 
     /// Create a `UserAccount`, without saving to the Keychain or generating passwords.
@@ -299,6 +300,7 @@ public struct UserAccount: Account, Equatable, Identity {
                                 url: String?,
                                 askToLogin: Bool?,
                                 askToChange: Bool?,
+                                tags: [AccountTagModel]?,
                                 context: LAContext? = nil) throws {
         if let newUsername = newUsername {
             self.username = newUsername
@@ -308,6 +310,9 @@ public struct UserAccount: Account, Equatable, Identity {
         }
         if let url = url {
             self.sites[0].url = url
+        }
+        if let tags = tags {
+            self.tagsSet = Set(tags.map{$0})
         }
         if let askToLogin = askToLogin {
             self.askToLogin = askToLogin
@@ -405,6 +410,7 @@ extension UserAccount: Codable {
         case timesUsed
         case lastTimeUsed
         case lastChange
+        case tagsSet
     }
 
     public init(from decoder: Decoder) throws {
@@ -422,6 +428,7 @@ extension UserAccount: Codable {
         self.timesUsed = try values.decodeIfPresent(Int.self, forKey: .timesUsed) ?? 0
         self.lastTimeUsed = try values.decodeIfPresent(Date.self, forKey: .lastTimeUsed)
         self.lastChange = try values.decodeIfPresent(Timestamp.self, forKey: .lastChange) ?? 0
+        self.tagsSet = try values.decodeIfPresent(Set<AccountTagModel>.self, forKey: .tagsSet) ?? Set<AccountTagModel>()
     }
 
 }

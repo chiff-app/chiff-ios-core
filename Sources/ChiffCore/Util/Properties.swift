@@ -28,6 +28,14 @@ public struct Properties {
         var host: String {
             return self == .dev ? "api.chiff.io" : "api.chiff.dev"
         }
+        
+        var description: String {
+            switch self {
+            case .dev: return "development"
+            case .beta: return "staging"
+            case .prod: return "production"
+            }
+        }
     }
 
     private static let receivedNewsMessagesFlag = "receivedNewsMessagesFlag"

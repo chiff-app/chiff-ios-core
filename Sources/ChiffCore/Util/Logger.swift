@@ -47,6 +47,8 @@ public protocol LoggerProtocol {
     ///   - properties: Additional properties
     ///   - override: Override the user preference.
     func analytics(_ event: AnalyticsEvent, properties: [AnalyticsEventProperty: Any]?, override: Bool)
+    
+    func feedback(message: String, name: String?, email: String?)
 }
 
 public extension LoggerProtocol {
@@ -106,6 +108,10 @@ public struct Logger: LoggerProtocol {
 
     public func analytics(_ event: AnalyticsEvent, properties: [AnalyticsEventProperty: Any]? = nil, override: Bool = false) {
         print("ℹ️ EVENT: \(event)")
+    }
+    
+    public func feedback(message: String, name: String?, email: String?) {
+        print("FEEDBACK: \(message)")
     }
 
 }

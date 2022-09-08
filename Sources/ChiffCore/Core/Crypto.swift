@@ -79,7 +79,7 @@ public class Crypto {
     /// - Returns: The key (256 bits).
     func deriveKeyFromSeed(seed: Data, keyType: KeyType, context: String) throws -> Data {
 
-        guard context.count == 8 else {
+        guard context.count <= 8 else {
             throw CryptoError.contextOverflow
         }
 

@@ -143,7 +143,7 @@ public struct TeamSession: Session {
     /// Return the organisation `KeyPair`.
     /// - Throws: Crypto or Keychain errors.
     /// - Returns: The organisation `KeyPair`.
-    static func organisationKeyPair() throws -> KeyPair? {
+    public static func organisationKeyPair() throws -> KeyPair? {
         guard let organisationKey = try TeamSession.all().first?.organisationKey else {
             return nil
         }

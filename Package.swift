@@ -15,13 +15,13 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(name: "TrustKit", url: "https://github.com/datatheorem/TrustKit.git", from: "1.7.0"),
+        .package(name: "TrustKit", url: "https://github.com/datatheorem/TrustKit.git", from: "2.0.1"),
         .package(name: "PromiseKit", url: "https://github.com/mxcl/PromiseKit.git", from: "6.13.3"),
         .package(name: "DataCompression", url: "https://github.com/mw99/DataCompression.git", from: "3.6.0"),
         .package(name: "OneTimePassword", url: "https://github.com/bas-d/OneTimePassword.git", .branch("spm")),
         .package(name: "PMKFoundation", url: "https://github.com/PromiseKit/Foundation.git", from: "3.3.4"),
         .package(name: "Kronos", url: "https://github.com/lyft/Kronos.git", from: "4.1.1"),
-        .package(name: "Sodium", url: "https://github.com/junelife/swift-sodium.git", .branch("master"))
+        .package(name: "Sodium", url: "https://github.com/jedisct1/swift-sodium.git", from: "0.9.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.

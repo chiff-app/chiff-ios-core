@@ -29,7 +29,7 @@ public struct Properties {
             return self == .dev ? "api.chiff.io" : "api.chiff.dev"
         }
         
-        var description: String {
+        public var description: String {
             switch self {
             case .dev: return "development"
             case .beta: return "staging"

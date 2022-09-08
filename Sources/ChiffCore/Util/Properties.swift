@@ -24,6 +24,10 @@ public struct Properties {
             case .prod: return "v1"
             }
         }
+        
+        var host: String {
+            return self == .dev ? "api.chiff.io" : "api.chiff.dev"
+        }
     }
 
     private static let receivedNewsMessagesFlag = "receivedNewsMessagesFlag"
@@ -234,9 +238,6 @@ public struct Properties {
 
         return false
     }()
-
-    /// The API path.
-    static let keynApi = "api.chiff.dev"
 
     /// The AWS ARN endpoint for this device for push notifications.
     public static var endpoint: String? {

@@ -1,5 +1,7 @@
 # ChiffCore ![Current version](https://img.shields.io/github/v/tag/chiff-app/chiff-ios-core?sort=semver) ![Twitter Follow](https://img.shields.io/twitter/follow/Chiff_App?style=social)
 
+**This repository is not used anymore. Since the repository was only used in [chiff-ios](https://github.com/chiff-app/chiff-ios), it has been moved there as an internal swift package, which provides a better development experience.**
+
 ![Chiff logo](https://chiff.app/assets/images/logo.svg)
 
 Chiff is a tool that allows you to log into any website with your phone. Passwords are stored on your phone and whenever you want to log in, you'll receive a push message to retrieve it.  

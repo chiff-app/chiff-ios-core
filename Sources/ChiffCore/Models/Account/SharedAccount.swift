@@ -13,6 +13,7 @@ import PromiseKit
 
 /// `SharedAccount`s are managed by a `TeamSession`.
 public struct SharedAccount: Account, Identity {
+    
     public let id: String
     public var username: String
     public var sites: [Site]
@@ -36,6 +37,8 @@ public struct SharedAccount: Account, Identity {
     public static let otpService: KeychainService = .sharedAccount(attribute: .otp)
     public static let notesService: KeychainService = .sharedAccount(attribute: .notes)
     public static let webAuthnService: KeychainService = .sharedAccount(attribute: .webauthn)
+    
+    private var tagsSet: Set<AccountTagModel> = Set<AccountTagModel>()
 
     init(id: String, username: String, sites: [Site], passwordIndex: Int, passwordOffset: [Int]?, version: Int, sessionId: String) {
         self.id = id
@@ -78,6 +81,19 @@ public struct SharedAccount: Account, Identity {
         self.passwordIndex = newIndex
         try update(secret: password.data)
         return true
+    }
+    
+    //MARK - Account Tag Model
+    public var tags: [AccountTagModel] {
+        return Array(self.tagsSet)
+    }
+    
+    public mutating func addTag(tag: AccountTagModel) {
+        self.tagsSet.insert(tag)
+    }
+    
+    public mutating func remove(tag: AccountTagModel) {
+        self.tagsSet.remove(tag)
     }
 
     // Documentation in protocol
